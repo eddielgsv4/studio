@@ -1,7 +1,7 @@
 
 "use client";
 
-import { withAuth } from '@/contexts/AuthContext';
+import { withAuth, useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/dashboard/Header';
 import { StatCards } from '@/components/dashboard/StatCards';
 import { Button } from '@/components/ui/button';
@@ -12,17 +12,28 @@ import { Rocket } from 'lucide-react';
 
 function Dashboard() {
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleCreateTestDocument = async () => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: "You must be signed in to create a document.",
+      });
+      return;
+    }
+
     try {
       const docRef = await addDoc(collection(db, "test"), {
         message: "This is a test document from the dashboard!",
         createdAt: serverTimestamp(),
+        userId: user.uid,
       });
       console.log("Document written with ID: ", docRef.id);
       toast({
         title: "Success!",
-        description: `Test document created with ID: ${docRef.id}`,
+        description: `Test document for user ${user.uid} created with ID: ${docRef.id}`,
       });
     } catch (e) {
       console.error("Error adding document: ", e);
