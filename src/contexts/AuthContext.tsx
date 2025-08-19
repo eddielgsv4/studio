@@ -4,7 +4,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 interface AuthContextType {
   user: User | null;
@@ -23,10 +23,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
+      if (user) {
+        const redirectUrl = localStorage.getItem('redirectUrl');
+        if (redirectUrl) {
+          router.replace(redirectUrl);
+          localStorage.removeItem('redirectUrl');
+        }
+      }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   const signOut = async () => {
     try {
@@ -56,12 +63,14 @@ export const withAuth = <P extends object>(WrappedComponent: React.ComponentType
   const WithAuthComponent = (props: P) => {
     const { user, loading } = useAuth();
     const router = useRouter();
+    const pathname = usePathname();
 
     useEffect(() => {
       if (!loading && !user) {
+        localStorage.setItem('redirectUrl', pathname);
         router.replace('/auth/signin');
       }
-    }, [user, loading, router]);
+    }, [user, loading, router, pathname]);
 
     if (loading || !user) {
       return (
