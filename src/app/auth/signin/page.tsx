@@ -28,7 +28,6 @@ const SignInPage = () => {
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
-      router.push('/dashboard');
     } catch (err: any) {
       setError(err.message);
     }
@@ -38,7 +37,6 @@ const SignInPage = () => {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      router.push('/dashboard');
     } catch (err: any) {
       setError(err.message);
     }

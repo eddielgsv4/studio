@@ -28,6 +28,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (redirectUrl) {
           router.replace(redirectUrl);
           localStorage.removeItem('redirectUrl');
+        } else {
+          router.replace('/');
         }
       }
     });
@@ -66,7 +68,7 @@ export const withAuth = <P extends object>(WrappedComponent: React.ComponentType
     const pathname = usePathname();
 
     useEffect(() => {
-      if (!loading && !user) {
+      if (!loading && !user && pathname !== '/auth/signin') {
         localStorage.setItem('redirectUrl', pathname);
         router.replace('/auth/signin');
       }

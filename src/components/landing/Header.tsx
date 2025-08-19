@@ -9,12 +9,13 @@ import { Icons } from '../icons';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '../ui/sheet';
 import Link from 'next/link';
 import { useDiagnostic } from '@/contexts/DiagnosticContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function Header() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
-    const context = useDiagnostic();
+    const { user, signOut } = useAuth();
 
     useEffect(() => {
         setIsMounted(true);
@@ -58,14 +59,11 @@ export function Header() {
         return renderPlaceholderHeader();
     }
 
-    const user = null; 
     const isAdmin = false;
 
     const renderAuthButtons = () => {
         return user ? (
-            <Button asChild>
-                <Link href="/dashboard">Meu Dashboard</Link>
-            </Button>
+            <Button onClick={signOut}>Sign Out</Button>
         ) : (
             <>
                 <Button asChild variant="outline">
@@ -80,11 +78,7 @@ export function Header() {
     
      const renderMobileAuthButtons = () => {
         return user ? (
-            <Button className="w-full" asChild>
-                    <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
-                    Meu Dashboard
-                </Link>
-            </Button>
+            <Button className="w-full" onClick={signOut}>Sign Out</Button>
         ) : (
             <>
                 <Button className="w-full" variant="outline" asChild>
