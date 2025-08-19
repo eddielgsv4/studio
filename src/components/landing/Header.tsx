@@ -35,31 +35,21 @@ export function Header() {
         }
         setIsMobileMenuOpen(false);
     };
-    
-    // This placeholder is crucial to prevent hydration mismatch errors.
+
     const renderPlaceholderHeader = () => (
-         <header className={cn(
-            "sticky top-0 z-50 w-full transition-all duration-300",
-            isScrolled ? "border-b bg-background/80 backdrop-blur-lg" : "bg-transparent"
-        )}>
-             <div className="container flex h-20 items-center justify-between">
-                 <Link href="/" onClick={(e) => handleLinkClick(e, '/')} className="flex items-center space-x-2">
-                    <Icons.logo className="h-8 w-8" />
-                    <span className="font-bold text-lg">V4SalesAI</span>
-                </Link>
-                <div className="hidden md:flex items-center justify-end space-x-4">
-                     <Button asChild variant="outline">
-                        <Link href="/auth/signin">Login</Link>
-                    </Button>
-                    <Button asChild>
-                        <Link href="/diagnostico/inicio" data-analytics-id="nav_cta_click">Quero meu diagnóstico</Link>
-                    </Button>
+         <header className="sticky top-0 z-50 w-full bg-transparent">
+             <div className="mx-auto max-w-7xl px-4 md:px-6">
+                <div className="flex h-20 items-center justify-between">
+                    <Link href="/" className="flex items-center space-x-2">
+                        <Icons.logo className="h-8 w-8" />
+                        <span className="font-bold text-lg">V4SalesAI</span>
+                    </Link>
+                    <div className="flex items-center md:hidden">
+                        <Button variant="ghost" size="icon">
+                            <Icons.menu className="h-6 w-6" />
+                        </Button>
+                    </div>
                 </div>
-                 <div className="flex items-center md:hidden">
-                    <Button variant="ghost" size="icon">
-                        <Icons.menu className="h-6 w-6" />
-                    </Button>
-                 </div>
             </div>
         </header>
     );
@@ -67,14 +57,7 @@ export function Header() {
     if (!isMounted) {
         return renderPlaceholderHeader();
     }
-    
-    // As context is not used in this component, we can remove this check
-    // if (!isMounted || context.loading) {
-    //     return renderPlaceholderHeader();
-    // }
 
-    // Hard-coding user to null as there's no auth context here yet.
-    // This should be replaced with actual auth state management.
     const user = null; 
     const isAdmin = false;
 
@@ -118,13 +101,13 @@ export function Header() {
         );
     }
 
-    const NavMenu = ({ className }: { className?: string }) => (
+    const NavMenu = ({ className, onLinkClick }: { className?: string, onLinkClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void }) => (
         <nav className={cn("items-center space-x-8 text-sm font-medium", className)}>
             {navLinks.map((link) => (
                 <a
                     key={link.label}
                     href={link.href}
-                    onClick={(e) => handleLinkClick(e, link.href)}
+                    onClick={(e) => onLinkClick(e, link.href)}
                     className="text-muted-foreground transition-colors hover:text-foreground"
                 >
                     {link.label}
@@ -142,59 +125,65 @@ export function Header() {
                 "sticky top-0 z-50 w-full transition-all duration-300",
                 isScrolled ? "border-b border-border/40 bg-background/80 backdrop-blur-lg" : "bg-transparent"
             )}>
-                <div className="container flex h-20 items-center justify-between">
-                     <Link href="/" className="flex items-center space-x-2">
-                        <Icons.logo className="h-8 w-8" />
-                        <span className="font-bold text-lg">V4SalesAI</span>
-                    </Link>
+                 <div className="mx-auto max-w-7xl px-4 md:px-6">
+                    <div className="flex h-20 items-center justify-between">
+                        {/* Left: Logo */}
+                        <Link href="/" onClick={(e) => handleLinkClick(e, '/')} className="flex items-center space-x-2">
+                            <Icons.logo className="h-8 w-8" />
+                            <span className="font-bold text-lg">V4SalesAI</span>
+                        </Link>
 
-                    <div className="hidden md:flex flex-1 items-center justify-center">
-                        <NavMenu className="hidden md:flex" />
-                    </div>
-
-                    <div className="hidden md:flex items-center justify-end space-x-4">
-                        {renderAuthButtons()}
-                    </div>
-
-                    <div className="flex items-center md:hidden">
-                        <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-                            <SheetTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                    <Icons.menu className="h-6 w-6" />
-                                    <span className="sr-only">Abrir menu</span>
-                                </Button>
-                            </SheetTrigger>
-                            <SheetContent side="right" className="w-full max-w-sm bg-background p-0">
-                                <SheetTitle className="sr-only">Menu Principal</SheetTitle>
-                                <SheetDescription className="sr-only">Navegue pelas seções do site ou acesse sua conta.</SheetDescription>
-                                <div className="flex h-full flex-col">
-                                    <div className="p-4 border-b">
-                                        <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
-                                            <Icons.logo className="h-8 w-8" />
-                                            <span className="font-bold text-lg">V4SalesAI</span>
-                                        </Link>
+                        {/* Center: Nav (Desktop) */}
+                        <div className="hidden md:flex flex-1 items-center justify-center">
+                            <NavMenu className="hidden md:flex" onLinkClick={handleLinkClick} />
+                        </div>
+                        
+                        {/* Right: Actions (Desktop) */}
+                        <div className="hidden md:flex items-center justify-end space-x-4">
+                            {renderAuthButtons()}
+                        </div>
+                        
+                        {/* Mobile Menu Button */}
+                        <div className="flex items-center md:hidden">
+                            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                                <SheetTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                        <Icons.menu className="h-6 w-6" />
+                                        <span className="sr-only">Abrir menu</span>
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent side="right" className="w-full max-w-sm bg-background p-0">
+                                    <SheetTitle className="sr-only">Menu Principal</SheetTitle>
+                                    <SheetDescription className="sr-only">Navegue pelas seções do site ou acesse sua conta.</SheetDescription>
+                                    <div className="flex h-full flex-col">
+                                        <div className="p-4 border-b">
+                                            <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
+                                                <Icons.logo className="h-8 w-8" />
+                                                <span className="font-bold text-lg">V4SalesAI</span>
+                                            </Link>
+                                        </div>
+                                        <nav className="flex flex-col space-y-2 p-4">
+                                            {navLinks.map((link) => (
+                                                <a
+                                                    key={link.label}
+                                                    href={link.href}
+                                                    onClick={(e) => handleLinkClick(e, link.href)}
+                                                    className="px-4 py-3 text-lg rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                                                >
+                                                    {link.label}
+                                                </a>
+                                            ))}
+                                            {isAdmin && (
+                                                <Link href="/admin/dashboard"  onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-3 text-lg rounded-md text-primary transition-colors hover:bg-secondary font-semibold">Admin</Link>
+                                            )}
+                                        </nav>
+                                        <div className="mt-auto flex flex-col gap-4 border-t p-4">
+                                            {renderMobileAuthButtons()}
+                                        </div>
                                     </div>
-                                    <nav className="flex flex-col space-y-2 p-4">
-                                        {navLinks.map((link) => (
-                                            <a
-                                                key={link.label}
-                                                href={link.href}
-                                                onClick={(e) => handleLinkClick(e, link.href)}
-                                                className="px-4 py-3 text-lg rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                                            >
-                                                {link.label}
-                                            </a>
-                                        ))}
-                                         {isAdmin && (
-                                            <Link href="/admin/dashboard"  onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-3 text-lg rounded-md text-primary transition-colors hover:bg-secondary font-semibold">Admin</Link>
-                                        )}
-                                    </nav>
-                                    <div className="mt-auto flex flex-col gap-4 border-t p-4">
-                                        {renderMobileAuthButtons()}
-                                    </div>
-                                </div>
-                            </SheetContent>
-                        </Sheet>
+                                </SheetContent>
+                            </Sheet>
+                        </div>
                     </div>
                 </div>
             </header>
