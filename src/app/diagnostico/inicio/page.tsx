@@ -67,21 +67,6 @@ export default function InicioPage() {
                 </p>
                 <p className="mt-4 text-xs text-muted-foreground">É gratuito e não requer cartão de crédito.</p>
             </div>
-
-            {/* Conditional rendering of sign-in/register section */}
-            {!user && (
-                <div className="mt-8 text-center">
-                    <p className="text-lg font-semibold mb-4">Já tem uma conta?</p>
-                    <div className="flex justify-center space-x-4">
-                        <Button variant="outline" size="lg" onClick={handleAuthRedirect}>
-                            Entrar
-                        </Button>
-                        <Button size="lg" onClick={handleAuthRedirect}>
-                            Criar Conta
-                        </Button>
-                    </div>
-                </div>
-            )}
         </StepShell>
     )
 }
