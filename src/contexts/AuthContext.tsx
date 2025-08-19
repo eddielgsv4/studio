@@ -28,8 +28,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (redirectUrl) {
           router.replace(redirectUrl);
           localStorage.removeItem('redirectUrl');
-        } else {
-          router.replace('/');
         }
       }
     });

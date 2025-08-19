@@ -5,25 +5,39 @@ import { Button } from "@/components/ui/button";
 import { StepFooter } from "@/components/diagnostico/StepFooter";
 import { StepShell } from "@/components/diagnostico/StepShell";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function InicioPage() {
+    const { user } = useAuth();
+    const router = useRouter();
+    const pathname = usePathname();
 
+    const handleAuthRedirect = () => {
+        localStorage.setItem('redirectUrl', pathname);
+        router.push('/auth/signin');
+    };
+
+    // Content for the aside section (assuming it's consistent)
     const AsideContent = (
- <div className="mx-auto max-w-7xl px-4 md:px-6 flex items-center space-x-2">
+        <div className="mx-auto max-w-7xl px-4 md:px-6 flex items-center space-x-2">
             <div className="flex h-full items-center justify-center">
- <Icons.logo className="h-40 w-40 text-primary/10" />
- </div>
- </div>
+                <Icons.logo className="h-40 w-40 text-primary/10" />
+            </div>
+        </div>
     );
     
+    // Content for the footer section
     const Footer = (
      <StepFooter 
         backHref="/"
      >
         <Button size="lg" asChild>
             <Link href="/diagnostico/conta" data-analytics-id="diag_start_click">
-                Começar o Diagnóstico
-                <Icons.arrowRight className="ml-2 h-4 w-4" />
+                <span>
+                    Começar o Diagnóstico
+                    <Icons.arrowRight className="ml-2 h-4 w-4" />
+                </span>
             </Link>
         </Button>
      </StepFooter>
@@ -53,6 +67,21 @@ export default function InicioPage() {
                 </p>
                 <p className="mt-4 text-xs text-muted-foreground">É gratuito e não requer cartão de crédito.</p>
             </div>
+
+            {/* Conditional rendering of sign-in/register section */}
+            {!user && (
+                <div className="mt-8 text-center">
+                    <p className="text-lg font-semibold mb-4">Já tem uma conta?</p>
+                    <div className="flex justify-center space-x-4">
+                        <Button variant="outline" size="lg" onClick={handleAuthRedirect}>
+                            Entrar
+                        </Button>
+                        <Button size="lg" onClick={handleAuthRedirect}>
+                            Criar Conta
+                        </Button>
+                    </div>
+                </div>
+            )}
         </StepShell>
     )
 }
