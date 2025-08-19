@@ -3,12 +3,12 @@ import {initializeApp, getApps, getApp} from 'firebase/app';
 import {getAuth} from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyBsJPFbmy4rICLIJQtIrG8-aLvqzLT2BkQ",
+  authDomain: "v4salesai.firebaseapp.com",
+  projectId: "v4salesai",
+  storageBucket: "v4salesai.firebasestorage.app",
+  messagingSenderId: "497433679232",
+  appId: "1:497433679232:web:1ee7486a0932e5fcd29d65"
 };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
