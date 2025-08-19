@@ -129,28 +129,72 @@ interface ChatLiteProps {
 }
 
 export default function ChatLite({ messages, isTyping }: ChatLiteProps) {
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-    }
-  }, [messages, isTyping]);
-
-
-  const renderBubbleContent = (message: ChatMessage) => {
-    if (message.text) {
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
+  
+    useEffect(() => {
+      if (scrollAreaRef.current) {
+        scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+      }
+    }, [messages, isTyping]);
+  
+    const renderBubbleContent = (message: ChatMessage) => {
+      if (message.text) {
         return (
-             <div 
-                className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-1 prose-strong:text-foreground"
-                dangerouslySetInnerHTML={{ __html: parseMessage(message.text) }} 
-            />
-        )
-    }
-    switch (message.type) {
-        case 'kpi': return <KpiBubble {...message.data as KpiBubbleProps} />;
-        case 'insights': return <InsightsBubble {...message.data as InsightsBubbleProps} />;
-        case 'summary': return <SummaryBubble {...message.data as SummaryBubbleProps} />;
-        default: return null;
-    }
+          <div
+            className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-1 prose-strong:text-foreground"
+            dangerouslySetInnerHTML={{ __html: parseMessage(message.text) }}
+          />
+        );
+      }
+      switch (message.type) {
+        case 'kpi':
+          return <KpiBubble {...(message.data as KpiBubbleProps)} />;
+        case 'insights':
+          return <InsightsBubble {...(message.data as InsightsBubbleProps)} />;
+        case 'summary':
+          return <SummaryBubble {...(message.data as SummaryBubbleProps)} />;
+        default:
+          return null;
+      }
+    };
+  
+    return (
+      <div
+        ref={scrollAreaRef}
+        className="flex max-h-[60vh] flex-col gap-3 overflow-y-auto p-3"
+      >
+        {messages.map((message, i) => {
+          // Try common fields; fall back gracefully
+          const isUser =
+            (message as any).role === 'user' ||
+            (message as any).author === 'user' ||
+            (message as any).from === 'user';
+  
+          return (
+            <div
+              key={(message as any).id ?? i}
+              className={cn('flex', isUser ? 'justify-end' : 'justify-start')}
+            >
+              <div
+                className={cn(
+                  'max-w-[80%] rounded-xl px-3 py-2',
+                  isUser
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-foreground'
+                )}
+              >
+                {renderBubbleContent(message)}
+              </div>
+            </div>
+          );
+        })}
+  
+        {isTyping && (
+          <div className="flex items-center gap-2">
+            <TypingIndicator />
+          </div>
+        )}
+      </div>
+    );
   }
+  
