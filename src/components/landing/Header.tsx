@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Header = () => {
-    const { user, signOut, loading } = useAuth();
+    const { user, signOut } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -23,7 +23,7 @@ const Header = () => {
           <a href="#faq" className="text-foreground/60 transition-colors hover:text-foreground/80">FAQ</a>
         </nav>
         <div className="flex flex-1 items-center justify-end space-x-4">
-           {loading ? null : user ? (
+           {user ? (
             <>
               <Button variant="ghost" asChild>
                 <Link href="/dashboard">Dashboard</Link>
