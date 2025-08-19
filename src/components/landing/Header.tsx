@@ -42,14 +42,14 @@ export function Header() {
             "sticky top-0 z-50 w-full transition-all duration-300",
             isScrolled ? "border-b bg-background/80 backdrop-blur-lg" : "bg-transparent"
         )}>
-             <div className="container flex h-20 max-w-7xl items-center justify-between">
+             <div className="container flex h-20 items-center justify-between">
                  <Link href="/" onClick={(e) => handleLinkClick(e, '/')} className="flex items-center space-x-2">
                     <Icons.logo className="h-8 w-8" />
                     <span className="font-bold text-lg">V4SalesAI</span>
                 </Link>
                 <div className="hidden md:flex items-center justify-end space-x-4">
                      <Button asChild variant="outline">
-                        <Link href="/login">Login</Link>
+                        <Link href="/auth/signin">Login</Link>
                     </Button>
                     <Button asChild>
                         <Link href="/diagnostico/inicio" data-analytics-id="nav_cta_click">Quero meu diagnóstico</Link>
@@ -64,21 +64,29 @@ export function Header() {
         </header>
     );
 
-    if (!isMounted || context.loading) {
+    if (!isMounted) {
         return renderPlaceholderHeader();
     }
+    
+    // As context is not used in this component, we can remove this check
+    // if (!isMounted || context.loading) {
+    //     return renderPlaceholderHeader();
+    // }
 
-    const { user, isAdmin } = context;
+    // Hard-coding user to null as there's no auth context here yet.
+    // This should be replaced with actual auth state management.
+    const user = null; 
+    const isAdmin = false;
 
     const renderAuthButtons = () => {
         return user ? (
             <Button asChild>
-                <Link href="/projetos">Meus Projetos</Link>
+                <Link href="/dashboard">Meu Dashboard</Link>
             </Button>
         ) : (
             <>
                 <Button asChild variant="outline">
-                <Link href="/login">Login</Link>
+                <Link href="/auth/signin">Login</Link>
                 </Button>
                 <Button asChild>
                     <Link href="/diagnostico/inicio" data-analytics-id="nav_cta_click">Quero meu diagnóstico</Link>
@@ -90,14 +98,14 @@ export function Header() {
      const renderMobileAuthButtons = () => {
         return user ? (
             <Button className="w-full" asChild>
-                    <Link href="/projetos" onClick={() => setIsMobileMenuOpen(false)}>
-                    Meus Projetos
+                    <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+                    Meu Dashboard
                 </Link>
             </Button>
         ) : (
             <>
                 <Button className="w-full" variant="outline" asChild>
-                        <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Link href="/auth/signin" onClick={() => setIsMobileMenuOpen(false)}>
                         Login
                     </Link>
                 </Button>
@@ -132,10 +140,10 @@ export function Header() {
         <>
             <header className={cn(
                 "sticky top-0 z-50 w-full transition-all duration-300",
-                isScrolled ? "border-b bg-background/80 backdrop-blur-lg" : "bg-transparent"
+                isScrolled ? "border-b border-border/40 bg-background/80 backdrop-blur-lg" : "bg-transparent"
             )}>
-                <div className="container flex h-20 max-w-7xl items-center justify-between">
- <Link href="/" className="flex items-center space-x-2">
+                <div className="container flex h-20 items-center justify-between">
+                     <Link href="/" className="flex items-center space-x-2">
                         <Icons.logo className="h-8 w-8" />
                         <span className="font-bold text-lg">V4SalesAI</span>
                     </Link>

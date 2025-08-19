@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bot, Chrome } from 'lucide-react';
+import { Bot } from 'lucide-react';
+import { Icons } from '@/components/icons';
 
 const SignInPage = () => {
   const [email, setEmail] = useState('');
@@ -47,12 +48,12 @@ const SignInPage = () => {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-           <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <Bot className="h-6 w-6" />
+           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <Icons.logo className="h-8 w-8" />
             </div>
-          <CardTitle className="font-headline text-3xl tracking-wider">{isSignUp ? 'Create an Account' : 'Welcome Back'}</CardTitle>
+          <CardTitle className="text-3xl font-bold tracking-tight">{isSignUp ? 'Crie sua Conta' : 'Acesse sua Conta'}</CardTitle>
           <CardDescription>
-            {isSignUp ? 'Sign up to get started.' : 'Sign in to continue to SalesAI.'}
+            {isSignUp ? 'Preencha os campos para começar.' : 'Bem-vindo de volta! Faça login para continuar.'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -64,12 +65,12 @@ const SignInPage = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
+                placeholder="nome@example.com"
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Senha</Label>
               <Input
                 id="password"
                 type="password"
@@ -81,7 +82,7 @@ const SignInPage = () => {
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button type="submit" className="w-full">
-              {isSignUp ? 'Sign Up' : 'Sign In'}
+              {isSignUp ? 'Criar Conta' : 'Entrar'}
             </Button>
           </form>
           <div className="relative my-4">
@@ -89,16 +90,16 @@ const SignInPage = () => {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-background px-2 text-muted-foreground">Ou continue com</span>
             </div>
           </div>
            <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
-            <Chrome className="mr-2 h-4 w-4" /> Google
+            <Icons.google className="mr-2 h-4 w-4" /> Google
           </Button>
           <p className="mt-4 text-center text-sm">
-            {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+            {isSignUp ? 'Já tem uma conta?' : "Não tem uma conta?"}{' '}
             <button onClick={() => setIsSignUp(!isSignUp)} className="font-semibold text-primary hover:underline">
-              {isSignUp ? 'Sign In' : 'Sign Up'}
+              {isSignUp ? 'Fazer Login' : 'Criar Conta'}
             </button>
           </p>
         </CardContent>
