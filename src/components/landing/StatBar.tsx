@@ -1,29 +1,35 @@
-"use client";
+import { Progress } from "../ui/progress";
+import { cn } from "@/lib/utils";
 
-import React from 'react';
+interface StatBarProps {
+    label: string;
+    value: number;
+    marketValue: number;
+    status: 'green' | 'amber' | 'red';
+}
 
-const stats = [
-  { value: '45%', label: 'Increase in Closing Rate' },
-  { value: '8h/week', label: 'Saved on Admin Tasks' },
-  { value: '300%', label: 'ROI in the First Quarter' },
-  { value: '24/7', label: 'AI Sales Assistance' },
-];
-
-const StatBar = () => {
-  return (
-    <section className="bg-card/50 py-12 sm:py-16">
-      <div className="container mx-auto">
-        <div className="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
-          {stats.map((stat) => (
-            <div key={stat.label}>
-              <p className="font-headline text-4xl tracking-wider text-primary md:text-5xl">{stat.value}</p>
-              <p className="mt-1 text-sm text-foreground/70 md:text-base">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+const statusConfig = {
+    green: { text: "Acima", color: "bg-green-500", progressClass: "bg-green-500" },
+    amber: { text: "Atenção", color: "bg-amber-500", progressClass: "bg-amber-500" },
+    red: { text: "Abaixo", color: "bg-primary", progressClass: "bg-primary" },
 };
 
-export default StatBar;
+export default function StatBar({ label, value, marketValue, status }: StatBarProps) {
+    const config = statusConfig[status] || statusConfig.red;
+    
+    return (
+        <div className="space-y-1.5">
+            <div className="flex justify-between items-center text-xs">
+                <span className="font-medium text-foreground">{label}</span>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                    <span>vs {marketValue}%</span>
+                    <div className={cn("h-2 w-2 rounded-full", config.color)} />
+                </div>
+            </div>
+            <div className="flex items-center gap-3">
+                <Progress value={value} indicatorClassName={config.progressClass} className="h-2" />
+                <span className="font-semibold text-foreground w-12 text-right text-sm">{value}%</span>
+            </div>
+        </div>
+    );
+}

@@ -1,59 +1,36 @@
-"use client";
-
-import React from 'react';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
 } from "@/components/ui/accordion"
+import { faqData } from "@/lib/data";
+import { Icons } from "../icons";
 
-const faqs = [
-  {
-    question: 'Is my sales data secure?',
-    answer: 'Absolutely. We use enterprise-grade encryption and security protocols to ensure your data is always safe and confidential. We are SOC 2 Type II compliant.'
-  },
-  {
-    question: 'Which CRMs do you integrate with?',
-    answer: 'We support native integrations with Salesforce, HubSpot, Zoho, and Pipedrive. We also offer a robust API for custom integrations with other systems.'
-  },
-  {
-    question: 'Can I try SalesAI before I buy?',
-    answer: 'Yes! We offer a 14-day free trial on our Starter and Pro plans, no credit card required. You can experience the full power of SalesAI for yourself.'
-  },
-  {
-    question: 'How long does it take to set up?',
-    answer: 'Getting started is quick and easy. Most teams are fully set up and see their first insights within 30 minutes of signing up. Our support team is here to help if you need it.'
-  },
-];
-
-
-const Faq = () => {
-  return (
-    <section id="faq" className="container mx-auto max-w-4xl px-4 py-24 sm:py-32">
-      <div className="mx-auto max-w-2xl text-center">
-        <p className="font-headline text-sm uppercase tracking-widest text-primary">Questions?</p>
-        <h2 className="font-headline mt-2 text-4xl tracking-wider md:text-5xl">
-          Frequently Asked Questions
-        </h2>
-        <p className="mt-4 text-lg text-foreground/70">
-          Have a different question? Feel free to reach out to our team.
-        </p>
-      </div>
-      <Accordion type="single" collapsible className="mt-12 w-full">
-        {faqs.map((faq, i) => (
-          <AccordionItem key={i} value={`item-${i}`}>
-            <AccordionTrigger className="text-left text-lg hover:no-underline">
-              {faq.question}
-            </AccordionTrigger>
-            <AccordionContent className="text-base text-foreground/80">
-              {faq.answer}
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
-    </section>
-  );
-};
-
-export default Faq;
+export default function Faq() {
+    return (
+        <section id="faq" className="w-full bg-background">
+            <div className="container mx-auto max-w-4xl px-4">
+                <div className="mx-auto text-center">
+                    <h2 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+                        Perguntas <span className="text-primary italic">Frequentes</span>
+                    </h2>
+                </div>
+                <div className="mt-12">
+                    <Accordion type="single" collapsible className="w-full space-y-4">
+                        {faqData.items.map((item, index) => (
+                            <AccordionItem key={item.id} value={item.id} className="rounded-lg border bg-card px-6 shadow-lg data-[state=open]:border-primary/50" data-analytics-id={`faq_open_${index}`}>
+                                <AccordionTrigger className="py-5 text-left text-lg font-semibold hover:no-underline">
+                                    {item.question}
+                                </AccordionTrigger>
+                                <AccordionContent className="pb-5 text-base text-muted-foreground">
+                                    {item.answer}
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
+                </div>
+            </div>
+        </section>
+    )
+}

@@ -1,39 +1,55 @@
-"use client";
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { ArrowRight, PlayCircle } from 'lucide-react';
+import { heroData } from '@/lib/data';
+import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
+import { Icons } from '../icons';
+import Link from 'next/link';
+import Image from 'next/image';
 
-const Hero = () => {
-  return (
-    <section className="container mx-auto flex flex-col items-center px-4 py-20 text-center sm:py-32">
-      <h1 className="font-headline text-5xl tracking-wider md:text-7xl lg:text-8xl">
-        CLOSE DEALS 10X FASTER
-      </h1>
-      <p className="mt-4 max-w-2xl text-lg text-foreground/80 md:text-xl">
-        Unlock superhuman sales performance with our AI-powered copilot. Automate tasks, get real-time insights, and focus on what truly matters: selling.
-      </p>
-      <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-        <Button size="lg" className="h-12 px-8 text-base">
-          Start Your Free Trial <ArrowRight className="ml-2 h-5 w-5" />
-        </Button>
-        <Button size="lg" variant="outline" className="h-12 px-8 text-base">
-          <PlayCircle className="mr-2 h-5 w-5" /> Watch a Demo
-        </Button>
-      </div>
-      <div className="relative mt-16 w-full max-w-5xl">
-        <div className="absolute -bottom-8 -left-8 -right-8 top-8 rounded-lg bg-primary/10"></div>
-        <div className="relative rounded-lg border-2 border-primary/50 bg-card p-2 shadow-2xl shadow-primary/20">
-          <img
-            src="https://placehold.co/1200x600.png"
-            alt="SalesAI Dashboard"
-            className="rounded-md"
-            data-ai-hint="dashboard analytics"
-          />
-        </div>
-      </div>
-    </section>
-  );
-};
-
-export default Hero;
+export default function Hero() {
+    return (
+        <section id="inicio" className="relative w-full bg-background pt-12 md:pt-16 pb-12">
+             <div
+                aria-hidden="true"
+                className="absolute inset-0 grid grid-cols-2 -space-x-52 opacity-20"
+            >
+                <div className="blur-[106px] h-56 bg-gradient-to-br from-primary to-black"></div>
+                <div className="blur-[106px] h-32 bg-gradient-to-r from-primary/50 to-black"></div>
+            </div>
+            <div className="container relative mx-auto max-w-7xl px-4">
+                <div className="mx-auto max-w-4xl text-center">
+                    <Badge variant="outline" className="px-4 py-2 text-sm border-primary/20 bg-primary/10 text-primary shadow-sm">
+                        {heroData.pill}
+                    </Badge>
+                    <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-foreground sm:text-6xl text-balance">
+                        {heroData.titlePart1} <span className="text-primary italic font-bold">{heroData.titleHighlight}</span>
+                    </h1>
+                    <p className="mt-6 text-lg leading-8 text-muted-foreground text-balance">
+                        {heroData.subtitle}
+                    </p>
+                    
+                    <div className="mt-10 flex flex-col items-center gap-x-6 gap-y-4 sm:flex-row sm:justify-center">
+                         <Button size="lg" asChild className="shadow-lg shadow-primary/20">
+                            <Link href={heroData.ctaPrimary.href} data-analytics-id={heroData.ctaPrimary.analyticsId}>
+                                {heroData.ctaPrimary.text}
+                            </Link>
+                        </Button>
+                    </div>
+                    
+                    <div className="mt-12 flex flex-col items-center sm:items-start gap-y-5 sm:flex-row sm:justify-center sm:gap-x-12">
+                        {heroData.bullets.map((bullet) => {
+                            const Icon = Icons[bullet.icon as keyof typeof Icons];
+                            return (
+                            <div key={bullet.text} className="flex items-center gap-3">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary">
+                                    <Icon className="h-5 w-5 text-primary" />
+                                </div>
+                                <span className="text-base font-medium text-foreground">{bullet.text}</span>
+                            </div>
+                        )})}
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}
