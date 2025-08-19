@@ -129,72 +129,100 @@ interface ChatLiteProps {
 }
 
 export default function ChatLite({ messages, isTyping }: ChatLiteProps) {
-    const scrollAreaRef = useRef<HTMLDivElement>(null);
-  
-    useEffect(() => {
-      if (scrollAreaRef.current) {
-        scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-      }
-    }, [messages, isTyping]);
-  
-    const renderBubbleContent = (message: ChatMessage) => {
-      if (message.text) {
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
+  }, [messages, isTyping]);
+
+
+  const renderBubbleContent = (message: ChatMessage) => {
+    if (message.text) {
         return (
-          <div
-            className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-1 prose-strong:text-foreground"
-            dangerouslySetInnerHTML={{ __html: parseMessage(message.text) }}
-          />
-        );
-      }
-      switch (message.type) {
-        case 'kpi':
-          return <KpiBubble {...(message.data as KpiBubbleProps)} />;
-        case 'insights':
-          return <InsightsBubble {...(message.data as InsightsBubbleProps)} />;
-        case 'summary':
-          return <SummaryBubble {...(message.data as SummaryBubbleProps)} />;
-        default:
-          return null;
-      }
-    };
-  
-    return (
-      <div
-        ref={scrollAreaRef}
-        className="flex max-h-[60vh] flex-col gap-3 overflow-y-auto p-3"
-      >
-        {messages.map((message, i) => {
-          // Try common fields; fall back gracefully
-          const isUser =
-            (message as any).role === 'user' ||
-            (message as any).author === 'user' ||
-            (message as any).from === 'user';
-  
-          return (
+             <div 
+                className="prose prose-sm prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-1 prose-strong:text-foreground"
+                dangerouslySetInnerHTML={{ __html: parseMessage(message.text) }} 
+            />
+        )
+    }
+    switch (message.type) {
+        case 'kpi': return <KpiBubble {...message.data as KpiBubbleProps} />;
+        case 'insights': return <InsightsBubble {...message.data as InsightsBubbleProps} />;
+        case 'summary': return <SummaryBubble {...message.data as SummaryBubbleProps} />;
+        default: return null;
+    }
+  }
+
+  return (
+    <div 
+        className="relative w-full h-[600px] bg-card/50 backdrop-blur-sm rounded-2xl border border-border shadow-2xl shadow-black/30 flex flex-col" 
+        data-analytics-id="chat_autoplay_start"
+    >
+        <div ref={scrollAreaRef} className="flex-1 p-4 sm:p-6 space-y-6 overflow-y-auto">
+          {messages.map((message, index) => (
             <div
-              key={(message as any).id ?? i}
-              className={cn('flex', isUser ? 'justify-end' : 'justify-start')}
+              key={index}
+              className={cn(
+                'flex items-start gap-3 text-sm animate-in fade-in duration-500',
+                message.agent === 'user' ? 'justify-end' : 'justify-start'
+              )}
+              data-analytics-id={`message_copilot_view_${index + 1}`}
             >
+              {message.agent === 'bot' && (
+                <Avatar className="w-9 h-9 border-2 border-primary/30 shadow-lg shadow-primary/20 flex-shrink-0">
+                  <div className="w-full h-full bg-secondary flex items-center justify-center rounded-full">
+                    <Icons.bot className="w-5 h-5 text-primary" />
+                  </div>
+                </Avatar>
+              )}
               <div
                 className={cn(
-                  'max-w-[80%] rounded-xl px-3 py-2',
-                  isUser
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-foreground'
+                  'max-w-[90%] md:max-w-[80%] rounded-xl p-3 md:p-4 shadow-md transition-all duration-150',
+                  message.agent === 'user'
+                    ? 'bg-secondary text-foreground'
+                    : 'bg-card border border-border/50'
                 )}
               >
                 {renderBubbleContent(message)}
               </div>
+               {message.agent === 'user' && (
+                 <Avatar className="w-9 h-9 flex items-center justify-center rounded-full font-bold flex-shrink-0 bg-secondary text-foreground">
+                  VO
+                </Avatar>
+              )}
             </div>
-          );
-        })}
-  
-        {isTyping && (
-          <div className="flex items-center gap-2">
-            <TypingIndicator />
-          </div>
-        )}
-      </div>
-    );
-  }
-  
+          ))}
+          {isTyping && (
+             <div className='flex items-start gap-3 text-sm justify-start'>
+                <Avatar className="w-9 h-9 border-2 border-primary/30 shadow-lg shadow-primary/20 flex-shrink-0">
+                  <div className="w-full h-full bg-secondary flex items-center justify-center rounded-full">
+                    <Icons.bot className="w-5 h-5 text-primary" />
+                  </div>
+                </Avatar>
+                <div className="bg-card border border-border/50 text-muted-foreground rounded-xl p-4 shadow-md">
+                    <TypingIndicator />
+                </div>
+            </div>
+          )}
+        </div>
+        <div className="p-4 border-t border-border/50 bg-card/70 rounded-b-2xl">
+            <div className="relative" suppressHydrationWarning>
+                <input
+                    suppressHydrationWarning
+                    type="text"
+                    placeholder="Digite sua mensagem..."
+                    className="w-full h-12 bg-secondary border border-border/80 rounded-xl px-4 pr-12 text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    disabled
+                />
+                <button 
+                    suppressHydrationWarning
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-muted-foreground/70 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors">
+                    <Icons.send className="w-5 h-5" />
+                </button>
+            </div>
+        </div>
+    </div>
+  );
+}
