@@ -5,7 +5,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import Link from 'next/link';
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,6 +17,7 @@ import { StepShell, TipCard } from "@/components/diagnostico/StepShell";
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase";
 import { Icons } from "@/components/icons";
+import { useAuth } from "@/contexts/AuthContext";
 
 const accountFormSchema = z.object({
   name: z.string().min(2, { message: "Seu nome precisa ter pelo menos 2 caracteres." }),
@@ -32,6 +34,7 @@ export default function ContaPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const { user, loading } = useAuth();
 
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
@@ -54,7 +57,10 @@ export default function ContaPage() {
   async function onSubmit(formData: AccountFormValues) {
     setIsLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      await updateProfile(userCredential.user, {
+        displayName: formData.name,
+      });
       handleSuccessfulLogin();
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
@@ -106,6 +112,40 @@ export default function ContaPage() {
         </Button>
      </StepFooter>
   );
+
+  if (loading) {
+    return (
+        <div className="flex items-center justify-center h-screen">
+            <Icons.refresh className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    );
+  }
+
+  if (user) {
+    return (
+      <StepShell
+        title={`Bem-vindo de volta, ${user.displayName || 'usuário'}!`}
+        description="Ficamos felizes em te ver novamente. Vamos continuar de onde você parou?"
+        aside={AsideContent}
+        footer={
+            <StepFooter backHref="/diagnostico/inicio">
+                <Button size="lg" asChild>
+                    <Link href="/diagnostico/empresa">Continuar diagnóstico</Link>
+                </Button>
+            </StepFooter>
+        }
+      >
+        <div className="space-y-6">
+            <div className="p-6 border rounded-lg bg-muted/20">
+                <h3 className="text-lg font-semibold">Continue seu diagnóstico</h3>
+                <p className="mt-2 text-muted-foreground">
+                    Você já tem uma conta e pode continuar seu diagnóstico de vendas para receber seu plano de ação personalizado.
+                </p>
+            </div>
+        </div>
+      </StepShell>
+    );
+  }
 
   return (
     <StepShell
