@@ -1,6 +1,4 @@
 
-'use client';
-
 import { Header } from '@/components/landing/Header';
 import Hero from '@/components/landing/Hero';
 import About from '@/components/landing/About';
