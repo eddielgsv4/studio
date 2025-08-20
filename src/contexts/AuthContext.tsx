@@ -23,13 +23,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
-      if (user) {
-        const redirectUrl = localStorage.getItem('redirectUrl');
-        if (redirectUrl) {
-          router.replace(redirectUrl);
-          localStorage.removeItem('redirectUrl');
-        }
-      }
+      // if (user) {
+      //   const redirectUrl = localStorage.getItem('redirectUrl');
+      //   if (redirectUrl) {
+      //     router.replace(redirectUrl);
+      //     localStorage.removeItem('redirectUrl');
+      //   }
+      // }
     });
 
     return () => unsubscribe();

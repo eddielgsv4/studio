@@ -34,7 +34,7 @@ const generateAdCreativeFlow = ai.defineFlow(
     await useCredits({ userId, amount: 50 });
 
     const {media} = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-preview-image-generation',
+        model: 'googleai/gemini-1.5-flash-preview-0514',
         prompt: `Generate a high-impact, photorealistic digital marketing ad creative based on the following prompt. The image should be clean, professional, and suitable for platforms like Instagram, Facebook, or LinkedIn. Focus on a central, clear subject with a compelling background. Avoid text in the image. Prompt: ${prompt}`,
         config: {
             responseModalities: ['TEXT', 'IMAGE'],

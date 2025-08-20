@@ -36,15 +36,15 @@ export default function ProdutoPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { data, updateData, user: diagnosticUser, refreshWallet } from useDiagnostic();
-  const { user, loading } = useAuth();
+  const { user, loading } from useAuth();
   const [preview, setPreview] = useState<string | null>(data.produto?.materialMarketingUri || null);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  useEffect(() => {
-    if (!loading && !user) {
-        router.push('/auth/signin');
-    }
-  }, [user, loading, router]);
+  // useEffect(() => {
+  //   if (!loading && !user) {
+  //       router.push('/auth/signin');
+  //   }
+  // }, [user, loading, router]);
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
