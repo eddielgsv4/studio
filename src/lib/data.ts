@@ -18,7 +18,7 @@ export const heroData = {
     pill: "Diagnóstico com IA + Plano de Ação + Créditos Iniciais Grátis",
     ctaPrimary: {
         text: "Quero Meu Diagnóstico Gratuito",
-        href: "/diagnostico/inicio",
+        href: "/cadastro",
         analyticsId: "hero_cta_primary_click"
     },
     bullets: [
@@ -35,7 +35,7 @@ export const aboutData = {
     cta: {
         text: "Pronto para evoluir suas vendas?",
         buttonText: "Começar Diagnóstico Gratuito",
-        href: "/diagnostico/inicio"
+        href: "/cadastro"
     }
 };
 
@@ -92,6 +92,7 @@ export const journeyData = {
     pills: ["Sem Cartão", "Sem Mensalidade", "Resultado Imediato"],
     cta: {
         text: "Gerar Meu Diagnóstico Agora",
+        href: "/cadastro",
         analyticsId: "journey_cta_click"
     }
 };
@@ -187,7 +188,7 @@ export const pricingData = {
     cta: {
         text: "Comece com um diagnóstico gratuito e créditos para testar!",
         buttonText: "Criar Conta Gratuita",
-        href: "/diagnostico/inicio",
+        href: "/cadastro",
         analyticsId: "pay_cta_click"
     }
 };
@@ -221,5 +222,3 @@ export const footerData = {
     tagline: "A plataforma de inteligência comercial que transforma dados em resultados.",
     copyright: "V4 Company © {ano} · Todos os direitos reservados."
 };
-
-    

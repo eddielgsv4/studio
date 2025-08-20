@@ -70,7 +70,6 @@ body {
   body {
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
- overflow-x: hidden;
     -moz-osx-font-smoothing: grayscale;
   }
 

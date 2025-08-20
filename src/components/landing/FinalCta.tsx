@@ -16,7 +16,7 @@ export default function FinalCta() {
                     </p>
                     <div className="mt-8 flex justify-center">
                         <Button size="lg" asChild data-analytics-id="footer_cta_click">
-                            <Link href="/diagnostico/inicio">
+                            <Link href="/cadastro">
                                 Gerar Meu Diagnóstico Gratuito
                                 <Icons.arrowRight className="ml-2 h-4 w-4" />
                             </Link>
