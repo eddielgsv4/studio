@@ -15,6 +15,8 @@ interface DiagnosticContextType {
   setCurrentQuestion: React.Dispatch<React.SetStateAction<number>>;
   updateResponse: (questionKey: string, answer: string) => void;
   resetDiagnosis: () => void;
+  data: any;
+  updateData: (newData: any) => void;
 }
 
 const DiagnosticContext = createContext<DiagnosticContextType | undefined>(undefined);
@@ -25,10 +27,15 @@ export const DiagnosticProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [data, setData] = useState<any>({});
   const { toast } = useToast();
 
   const updateResponse = useCallback((questionKey: string, answer: string) => {
     setResponses(prev => ({ ...prev, [questionKey]: answer }));
+  }, []);
+
+  const updateData = useCallback((newData: any) => {
+    setData((prev: any) => ({ ...prev, ...newData }));
   }, []);
 
   const submitDiagnosis = async () => {
@@ -61,6 +68,7 @@ export const DiagnosticProvider = ({ children }: { children: ReactNode }) => {
     setDiagnosis(null);
     setError(null);
     setCurrentQuestion(0);
+    setData({});
   }, []);
 
   return (
@@ -75,6 +83,8 @@ export const DiagnosticProvider = ({ children }: { children: ReactNode }) => {
         setCurrentQuestion,
         updateResponse,
         resetDiagnosis,
+        data,
+        updateData,
       }}
     >
       {children}

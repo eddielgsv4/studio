@@ -51,6 +51,6 @@ const aiSalesDiagnosisFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    return output;
   }
 );

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -5,8 +6,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import Link from 'next/link';
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,9 +16,10 @@ import { Input } from "@/components/ui/input";
 import { StepFooter } from "@/components/diagnostico/StepFooter";
 import { StepShell, TipCard } from "@/components/diagnostico/StepShell";
 import { useToast } from "@/hooks/use-toast";
-import { auth } from "@/lib/firebase";
+import { auth } from "@/lib/auth/firebase";
 import { Icons } from "@/components/icons";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDiagnostic } from "@/contexts/DiagnosticContext";
 
 const accountFormSchema = z.object({
   name: z.string().min(2, { message: "Seu nome precisa ter pelo menos 2 caracteres." }),
@@ -33,12 +35,13 @@ type AccountFormValues = z.infer<typeof accountFormSchema>;
 export default function ContaPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { data, updateData } = useDiagnostic();
   const [isLoading, setIsLoading] = useState(false);
   const { user, loading } = useAuth();
 
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
-    defaultValues: {
+    defaultValues: data.conta || {
       name: "",
       email: "",
       password: "",
@@ -61,6 +64,8 @@ export default function ContaPage() {
       await updateProfile(userCredential.user, {
         displayName: formData.name,
       });
+      // Save final data before navigating
+      updateData('conta', { name: formData.name, email: formData.email, lgpd: formData.lgpd });
       handleSuccessfulLogin();
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
