@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
+import Link from "next/link";
+import { ProgressBar } from "./ProgressBar";
 
 interface StepShellProps {
   title: string;
@@ -11,22 +13,47 @@ interface StepShellProps {
 
 export function StepShell({ title, description, aside, children, footer }: StepShellProps) {
   return (
-    <div className="flex min-h-screen w-full bg-secondary">
-      <aside className="hidden w-[380px] flex-col border-r border-border bg-background p-8 lg:flex">
-        {aside}
-      </aside>
-      <main className="flex flex-1 flex-col">
-        <div className="flex-1 px-4 py-8 sm:p-8">
-          <div className="mx-auto max-w-3xl">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">{title}</h1>
-            <p className="mt-2 text-muted-foreground">{description}</p>
-            <div className="mt-8">
-              {children}
+    <div className="flex min-h-screen w-full flex-col bg-secondary">
+      {/* Header */}
+      <header className="sticky top-0 z-20 w-full border-b border-border bg-background/95 backdrop-blur-sm">
+        <div className="flex h-16 items-center">
+          {/* Spacer for sidebar on desktop - using relative units */}
+          <div className="hidden lg:block lg:w-[380px] flex-shrink-0"></div>
+          
+          {/* Header content aligned with main content area */}
+          <div className="container flex flex-1 h-16 max-w-7xl items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <Icons.logo className="h-6 w-6" />
+              <span className="font-bold text-lg">V4SalesAI</span>
+            </Link>
+            <div className="w-full max-w-md hidden sm:block">
+              <ProgressBar />
+            </div>
+            <div>
+              {/* Placeholder */}
             </div>
           </div>
         </div>
-        {footer}
-      </main>
+      </header>
+
+      {/* Main content with sidebar */}
+      <div className="flex flex-1">
+        <aside className="hidden w-[380px] flex-col border-r border-border bg-background p-8 lg:flex">
+          {aside}
+        </aside>
+        <main className="flex flex-1 flex-col">
+          <div className="flex-1 px-4 py-8 sm:p-8">
+            <div className="mx-auto max-w-3xl">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">{title}</h1>
+              <p className="mt-2 text-muted-foreground">{description}</p>
+              <div className="mt-8">
+                {children}
+              </div>
+            </div>
+          </div>
+          {footer}
+        </main>
+      </div>
     </div>
   );
 }

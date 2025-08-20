@@ -20,10 +20,8 @@ export default function InicioPage() {
 
     // Content for the aside section (assuming it's consistent)
     const AsideContent = (
-        <div className="mx-auto max-w-7xl px-4 md:px-6 flex items-center space-x-2">
-            <div className="flex h-full items-center justify-center">
-                <Icons.logo className="h-40 w-40 text-primary/10" />
-            </div>
+        <div className="flex h-full items-center justify-center">
+            <Icons.logo className="h-32 w-32 text-primary" />
         </div>
     );
     
@@ -33,11 +31,9 @@ export default function InicioPage() {
         backHref="/"
      >
         <Button size="lg" asChild>
-            <Link href="/diagnostico/conta" data-analytics-id="diag_start_click">
-                <span>
-                    Começar o Diagnóstico
-                    <Icons.arrowRight className="ml-2 h-4 w-4" />
-                </span>
+            <Link href="/diagnostico/conta" data-analytics-id="diag_start_click" className="flex items-center whitespace-nowrap">
+                Começar o Diagnóstico
+                <Icons.arrowRight className="ml-2 h-4 w-4" />
             </Link>
         </Button>
      </StepFooter>

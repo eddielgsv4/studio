@@ -35,8 +35,19 @@ type ProductFormValues = z.infer<typeof productFormSchema>;
 export default function ProdutoPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { data, updateData, user: diagnosticUser, refreshWallet } from useDiagnostic();
-  const { user, loading } from useAuth();
+  const { data, updateData } = useDiagnostic();
+  const { user, loading } = useAuth();
+  
+  // Initialize with safe defaults to prevent uncontrolled input errors
+  const defaultValues: ProductFormValues = {
+    propostaDeValor: data.produto?.propostaDeValor || "",
+    modeloPricing: data.produto?.modeloPricing || "",
+    diferenciais: data.produto?.diferenciais || "",
+    materialMarketingUri: data.produto?.materialMarketingUri || "",
+    adPrompt: data.produto?.adPrompt || "",
+    adContext: data.produto?.adContext || "",
+  };
+
   const [preview, setPreview] = useState<string | null>(data.produto?.materialMarketingUri || null);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -48,7 +59,7 @@ export default function ProdutoPage() {
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
-    defaultValues: data.produto || {},
+    defaultValues,
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +86,7 @@ export default function ProdutoPage() {
         });
         return;
     }
-    if (!diagnosticUser) {
+    if (!user) {
         toast({
             variant: 'destructive',
             title: 'Erro',
@@ -87,17 +98,16 @@ export default function ProdutoPage() {
     setIsGenerating(true);
     try {
         const fullPrompt = `Descrição: ${prompt}. Contexto adicional: ${context || 'Nenhum'}`;
-        const imageUrl = await runGenerateAdCreative({ userId: diagnosticUser.uid, prompt: fullPrompt });
+        const imageUrl = await runGenerateAdCreative({ userId: user.uid, prompt: fullPrompt });
         setPreview(imageUrl);
         form.setValue('materialMarketingUri', imageUrl);
-        refreshWallet();
         toast({
             title: 'Criativo gerado com sucesso!',
             description: 'A imagem foi gerada e está pronta para ser analisada. 50 créditos foram debitados.',
         });
     } catch (error: any) {
         console.error("Ad Creative Generation Error:", error);
-        let description = 'Não foi possível gerar la imagem. Tente novamente.';
+        let description = 'Não foi possível gerar a imagem. Tente novamente.';
         if (error.message.includes('Insufficient credits')) {
             description = 'Créditos insuficientes para gerar uma imagem.';
         }
@@ -113,11 +123,11 @@ export default function ProdutoPage() {
 
   const removePreview = () => {
     setPreview(null);
-    form.setValue('materialMarketingUri', undefined);
+    form.setValue('materialMarketingUri', "");
   }
 
   function onSubmit(formData: ProductFormValues) {
-    updateData('produto', formData);
+    updateData({ produto: formData });
     toast({
       title: "Progresso salvo!",
       description: "As informações do seu produto foram salvas.",
@@ -166,6 +176,7 @@ export default function ProdutoPage() {
                   <Textarea
                     placeholder="Ex: Ajudamos empresas B2B a reduzirem o custo de aquisição em 20% com automação de marketing."
                     {...field}
+                    value={field.value || ""}
                   />
                 </FormControl>
                 <FormMessage />
@@ -182,6 +193,7 @@ export default function ProdutoPage() {
                   <Textarea
                     placeholder="Ex: Única plataforma com IA generativa para criação de copys, suporte 24/7 em português, e integração nativa com o RD Station."
                     {...field}
+                    value={field.value || ""}
                   />
                 </FormControl>
                 <FormMessage />
@@ -195,7 +207,7 @@ export default function ProdutoPage() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Modelo de Precificação (Pricing)</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione o modelo" />
@@ -267,6 +279,7 @@ export default function ProdutoPage() {
                                     <Textarea
                                         placeholder="Descreva a imagem que você quer criar. Ex: Um close-up de um tênis de corrida futurista em um fundo de neon, com foco na tecnologia da sola."
                                         {...field}
+                                        value={field.value || ""}
                                         rows={3}
                                     />
                                     </FormControl>
@@ -281,7 +294,7 @@ export default function ProdutoPage() {
                                 <FormItem>
                                     <FormLabel>Contexto Adicional (Opcional)</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Ex: Público-alvo são corredores de maratona; a campanha é para o Instagram." {...field} />
+                                        <Input placeholder="Ex: Público-alvo são corredores de maratona; a campanha é para o Instagram." {...field} value={field.value || ""} />
                                     </FormControl>
                                     <FormDescription>
                                         Forneça contexto para ajudar a IA a gerar uma imagem e, futuramente, uma copy mais eficaz.
