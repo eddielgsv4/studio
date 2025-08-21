@@ -30,7 +30,7 @@ export default function Hero() {
                     
                     <div className="mt-10 flex flex-col items-center gap-x-6 gap-y-4 sm:flex-row sm:justify-center">
                          <Button size="lg" asChild className="shadow-lg shadow-primary/20">
-                            <Link href={heroData.ctaPrimary.href} data-analytics-id={heroData.ctaPrimary.analyticsId}>
+                            <Link href="/cadastro" data-analytics-id={heroData.ctaPrimary.analyticsId}>
                                 {heroData.ctaPrimary.text}
                             </Link>
                         </Button>

@@ -67,7 +67,7 @@ export default function DiagnosisSection() {
 
                 <div className="mt-20 text-center">
                     <Button size="lg" asChild data-analytics-id="diag_cta_click">
-                        <Link href="/diagnostico/conta">
+                        <Link href="/cadastro">
                             Quero Meu Diagnóstico com IA AGORA!
                             <Icons.arrowRight className="ml-2 h-4 w-4" />
                         </Link>

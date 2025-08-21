@@ -72,7 +72,7 @@ export default function Gift() {
                                 className="w-full sm:w-auto bg-green-500 text-white shadow-lg shadow-green-500/20 transition-all duration-150 transform hover:bg-green-600 hover:-translate-y-0.5"
                                 data-analytics-id="gift_cta_click"
                             >
-                                <Link href="/diagnostico/inicio">{giftData.cta}</Link>
+                                <Link href="/cadastro">{giftData.cta}</Link>
                             </Button>
                             <p className="text-xs text-muted-foreground/70">{giftData.caption}</p>
                         </div>

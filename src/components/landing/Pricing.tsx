@@ -52,7 +52,7 @@ export default function Pricing() {
                                     {pricingData.cta.text}
                                 </p>
                                 <Button asChild size="lg" className="flex-shrink-0" data-analytics-id="pay_cta_click">
-                                    <Link href={pricingData.cta.href}>{pricingData.cta.buttonText}</Link>
+                                    <Link href="/cadastro">{pricingData.cta.buttonText}</Link>
                                 </Button>
                             </div>
                         </CardContent>

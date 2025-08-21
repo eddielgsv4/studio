@@ -63,11 +63,16 @@ export function Header() {
 
     const renderAuthButtons = () => {
         return user ? (
-            <Button onClick={signOut}>Sign Out</Button>
+            <>
+                <Button asChild variant="outline">
+                    <Link href="/projetos">My Projects</Link>
+                </Button>
+                <Button onClick={signOut}>Sign Out</Button>
+            </>
         ) : (
             <>
                 <Button asChild variant="outline">
-                <Link href="/auth/signin">Login</Link>
+                <Link href="/login">Entrar</Link>
                 </Button>
                 <Button asChild>
                     <Link href="/diagnostico/inicio" data-analytics-id="nav_cta_click">Quero meu diagnóstico</Link>
@@ -78,12 +83,17 @@ export function Header() {
     
      const renderMobileAuthButtons = () => {
         return user ? (
-            <Button className="w-full" onClick={signOut}>Sign Out</Button>
+            <>
+                <Button className="w-full" variant="outline" asChild>
+                    <Link href="/projetos" onClick={() => setIsMobileMenuOpen(false)}>My Projects</Link>
+                </Button>
+                <Button className="w-full" onClick={signOut}>Sign Out</Button>
+            </>
         ) : (
             <>
                 <Button className="w-full" variant="outline" asChild>
                         <Link href="/auth/signin" onClick={() => setIsMobileMenuOpen(false)}>
-                        Login
+ Entrar
                     </Link>
                 </Button>
                 <Button className="w-full" asChild>
