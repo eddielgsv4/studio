@@ -7,7 +7,7 @@ import { withAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db } from '@/lib/auth/firebase';
 import { Icons } from '@/components/icons';
 
 function Dashboard() {
