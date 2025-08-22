@@ -28,6 +28,34 @@ interface CollectedData {
   taxaFechamento?: string;
   motivoPerdas?: string;
   retencao?: string;
+  // Topo de Funil
+  topoVisitanteLead?: string;
+  topoCTRAnuncios?: string;
+  leadsMes?: string;
+  custoPorLead?: string;
+  // Novos KPIs por etapa do funil
+  // Topo de Funil
+  qualidadeLead?: string;
+  tempoPagina?: string;
+  // Meio de Funil
+  leadMQL?: string;
+  tempoResposta?: string;
+  showRate?: string;
+  emailOpenRate?: string;
+  clickRate?: string;
+  leadScoreMedio?: string;
+  // Fundo de Funil
+  mqlSQL?: string;
+  sqlVenda?: string;
+  propostaFechamento?: string;
+  reunioesVendedor?: string;
+  // Pós Conversão
+  churn30d?: string;
+  recompra60d?: string;
+  ltv?: string;
+  nps?: string;
+  tempoOnboarding?: string;
+  upsellRate?: string;
 }
 
 // Componente de chat com visualização das informações coletadas
@@ -63,25 +91,105 @@ export default function OnboardingPage() {
           </div>
 
           <div className="bg-[#1a1b1e] rounded-lg p-6 mb-8">
-            <h3 className="text-lg font-semibold mb-4">Dados Coletados:</h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="text-left">
-                <span className="text-gray-400">Nome:</span> {collectedData.nome}
+            <h3 className="text-lg font-semibold mb-4">Dados Coletados por Etapa do Funil:</h3>
+            
+            {/* Topo de Funil */}
+            <div className="mb-6">
+              <h4 className="text-md font-semibold text-[#E11D2E] mb-3">🎯 Topo de Funil</h4>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="text-left">
+                  <span className="text-gray-400">Visitante → Lead:</span> {collectedData.topoVisitanteLead ? `${collectedData.topoVisitanteLead}%` : '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">CTR Anúncios:</span> {collectedData.topoCTRAnuncios ? `${collectedData.topoCTRAnuncios}%` : '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">Leads/Mês:</span> {collectedData.leadsMes || '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">Custo por Lead:</span> {collectedData.custoPorLead ? `R$ ${collectedData.custoPorLead}` : '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">Qualidade do Lead:</span> {collectedData.qualidadeLead || '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">Tempo na Página:</span> {collectedData.tempoPagina || '—'}
+                </div>
               </div>
-              <div className="text-left">
-                <span className="text-gray-400">Segmento:</span> {collectedData.segmento}
+            </div>
+
+            {/* Meio de Funil */}
+            <div className="mb-6">
+              <h4 className="text-md font-semibold text-[#E11D2E] mb-3">🎯 Meio de Funil</h4>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="text-left">
+                  <span className="text-gray-400">Lead → MQL:</span> {collectedData.leadMQL || '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">Tempo de Resposta:</span> {collectedData.tempoResposta || '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">Show Rate:</span> {collectedData.showRate || '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">Email Open Rate:</span> {collectedData.emailOpenRate || '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">Click Rate:</span> {collectedData.clickRate || '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">Lead Score Médio:</span> {collectedData.leadScoreMedio || '—'}
+                </div>
               </div>
-              <div className="text-left">
-                <span className="text-gray-400">Ticket Médio:</span> {collectedData.ticketMedio}
+            </div>
+
+            {/* Fundo de Funil */}
+            <div className="mb-6">
+              <h4 className="text-md font-semibold text-[#E11D2E] mb-3">🎯 Fundo de Funil</h4>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="text-left">
+                  <span className="text-gray-400">MQL → SQL:</span> {collectedData.mqlSQL || '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">SQL → Venda:</span> {collectedData.sqlVenda || '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">Ticket Médio:</span> {collectedData.ticketMedio || '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">Ciclo de Vendas:</span> {collectedData.cicloVendas ? `${collectedData.cicloVendas} dias` : '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">Proposta → Fechamento:</span> {collectedData.propostaFechamento || '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">Reuniões/Vendedor:</span> {collectedData.reunioesVendedor || '—'}
+                </div>
               </div>
-              <div className="text-left">
-                <span className="text-gray-400">Ciclo de Vendas:</span> {collectedData.cicloVendas} dias
-              </div>
-              <div className="text-left">
-                <span className="text-gray-400">Visitantes/mês:</span> {collectedData.visitantes}
-              </div>
-              <div className="text-left">
-                <span className="text-gray-400">Taxa Fechamento:</span> {collectedData.taxaFechamento}
+            </div>
+
+            {/* Pós Conversão */}
+            <div className="mb-4">
+              <h4 className="text-md font-semibold text-[#E11D2E] mb-3">🎯 Pós Conversão</h4>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="text-left">
+                  <span className="text-gray-400">Churn 30d:</span> {collectedData.churn30d || '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">Recompra 60d:</span> {collectedData.recompra60d || '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">LTV:</span> {collectedData.ltv || '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">NPS:</span> {collectedData.nps || '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">Tempo Onboarding:</span> {collectedData.tempoOnboarding || '—'}
+                </div>
+                <div className="text-left">
+                  <span className="text-gray-400">Upsell Rate:</span> {collectedData.upsellRate || '—'}
+                </div>
               </div>
             </div>
           </div>

@@ -10,19 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { 
-  auth, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signOut, 
-  GoogleAuthProvider, 
-  signInWithPopup,
-  onAuthStateChanged,
-  type User 
-} from '@/lib/auth/firebase';
-import { 
   supabase, 
-  getSupabaseWithFreshToken,
-  getCurrentUserFromJWT, 
   createUserProfile, 
   getUserProfile, 
   testSupabaseConnection 
@@ -30,7 +18,7 @@ import {
 
 interface TestData {
   id?: string;
-  firebase_uid: string;
+  user_id: string;
   title: string;
   content: string;
   created_at?: string;
@@ -38,7 +26,7 @@ interface TestData {
 
 interface UserProfile {
   id?: string;
-  firebase_uid: string;
+  user_id: string;
   email?: string;
   name?: string;
   created_at?: string;
@@ -46,13 +34,15 @@ interface UserProfile {
 }
 
 export default function SupabaseTestPage() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [testResults, setTestResults] = useState<string[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [allUserProfiles, setAllUserProfiles] = useState<UserProfile[]>([]);
   const [testData, setTestData] = useState<TestData[]>([]);
   
   // Form states
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [testTitle, setTestTitle] = useState('');
@@ -61,22 +51,28 @@ export default function SupabaseTestPage() {
   // Status states
   const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
   const [supabaseStatus, setSupabaseStatus] = useState<'unknown' | 'connected' | 'error'>('unknown');
+  const [showConfirmationMessage, setShowConfirmationMessage] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setAuthStatus(user ? 'authenticated' : 'unauthenticated');
-      setLoading(false);
-      
-      if (user) {
-        loadUserData();
-      } else {
-        setUserProfile(null);
-        setTestData([]);
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        setAuthStatus(currentUser ? 'authenticated' : 'unauthenticated');
+        setLoading(false);
+        if (currentUser) {
+          setShowConfirmationMessage(false);
+          loadUserData();
+        } else {
+          setUserProfile(null);
+          setTestData([]);
+        }
       }
-    });
+    );
 
-    return () => unsubscribe();
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const addTestResult = (message: string) => {
@@ -91,7 +87,8 @@ export default function SupabaseTestPage() {
   const handleEmailSignIn = async () => {
     try {
       setLoading(true);
-      await signInWithEmailAndPassword(auth, email, password);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
       addTestResult('✅ Email sign-in successful');
     } catch (error: any) {
       addTestResult(`❌ Email sign-in failed: ${error.message}`);
@@ -103,8 +100,16 @@ export default function SupabaseTestPage() {
   const handleEmailSignUp = async () => {
     try {
       setLoading(true);
-      await createUserWithEmailAndPassword(auth, email, password);
-      addTestResult('✅ Email sign-up successful');
+      setShowConfirmationMessage(false);
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) throw error;
+
+      if (data.session) {
+        addTestResult('✅ Sign-up successful! You are now signed in.');
+      } else {
+        addTestResult('✅ Sign-up successful! Please check your email to confirm your account before signing in.');
+        setShowConfirmationMessage(true);
+      }
     } catch (error: any) {
       addTestResult(`❌ Email sign-up failed: ${error.message}`);
     } finally {
@@ -115,8 +120,8 @@ export default function SupabaseTestPage() {
   const handleGoogleSignIn = async () => {
     try {
       setLoading(true);
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+      if (error) throw error;
       addTestResult('✅ Google sign-in successful');
     } catch (error: any) {
       addTestResult(`❌ Google sign-in failed: ${error.message}`);
@@ -127,7 +132,8 @@ export default function SupabaseTestPage() {
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       addTestResult('✅ Sign-out successful');
     } catch (error: any) {
       addTestResult(`❌ Sign-out failed: ${error.message}`);
@@ -153,33 +159,34 @@ export default function SupabaseTestPage() {
 
   const loadUserData = async () => {
     try {
-      const userInfo = await getCurrentUserFromJWT();
-      if (!userInfo) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
         addTestResult('❌ No user info from JWT');
         return;
       }
 
-      addTestResult(`✅ User info from JWT: ${userInfo.email} (${userInfo.firebase_uid})`);
+      addTestResult(`✅ User info from JWT: ${user.email} (${user.id})`);
 
       // Try to get user profile
-      const profile = await getUserProfile(userInfo.firebase_uid);
+      const profile = await getUserProfile(user.id);
       if (profile) {
         setUserProfile(profile);
         addTestResult('✅ User profile loaded from Supabase');
       } else {
         addTestResult('ℹ️ No user profile found, creating one...');
         await createUserProfile({
-          firebase_uid: userInfo.firebase_uid,
-          email: userInfo.email,
-          name: userInfo.name,
+          user_id: user.id,
+          email: user.email,
+          name: user.user_metadata.name,
         });
-        const newProfile = await getUserProfile(userInfo.firebase_uid);
+        const newProfile = await getUserProfile(user.id);
         setUserProfile(newProfile);
         addTestResult('✅ User profile created in Supabase');
       }
 
       // Load test data
       await loadTestData();
+      await loadAllUserProfiles();
     } catch (error: any) {
       addTestResult(`❌ Error loading user data: ${error.message}`);
     }
@@ -187,13 +194,13 @@ export default function SupabaseTestPage() {
 
   const loadTestData = async () => {
     try {
-      const userInfo = await getCurrentUserFromJWT();
-      if (!userInfo) return;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
       const { data, error } = await supabase
         .from('test_data')
         .select('*')
-        .eq('firebase_uid', userInfo.firebase_uid)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -207,8 +214,8 @@ export default function SupabaseTestPage() {
 
   const createTestData = async () => {
     try {
-      const userInfo = await getCurrentUserFromJWT();
-      if (!userInfo) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
         addTestResult('❌ User not authenticated');
         return;
       }
@@ -219,11 +226,10 @@ export default function SupabaseTestPage() {
       }
 
       // Use fresh token for authenticated operations
-      const freshSupabase = getSupabaseWithFreshToken();
-      const { data, error } = await freshSupabase
+      const { data, error } = await supabase
         .from('test_data')
         .insert([{
-          firebase_uid: userInfo.firebase_uid,
+          user_id: user.id,
           title: testTitle.trim(),
           content: testContent.trim(),
         }])
@@ -257,12 +263,56 @@ export default function SupabaseTestPage() {
     }
   };
 
+  const loadAllUserProfiles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setAllUserProfiles(data || []);
+      addTestResult(`✅ Loaded ${data?.length || 0} user profiles`);
+    } catch (error: any) {
+      addTestResult(`❌ Error loading user profiles: ${error.message}`);
+    }
+  };
+
+  const updateUserProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        addTestResult('❌ User not authenticated');
+        return;
+      }
+
+      if (!name.trim()) {
+        addTestResult('❌ Please fill in the name');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ name: name.trim() })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      addTestResult('✅ User profile updated successfully');
+      setName('');
+      await loadUserData();
+    } catch (error: any) {
+      addTestResult(`❌ Error updating user profile: ${error.message}`);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold">Firebase Auth + Supabase Integration Test</h1>
+        <h1 className="text-3xl font-bold">Supabase Auth + Supabase Integration Test</h1>
         <p className="text-muted-foreground mt-2">
-          Test Firebase authentication and Supabase data operations
+          Test Supabase authentication and Supabase data operations
         </p>
       </div>
 
@@ -271,7 +321,7 @@ export default function SupabaseTestPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              Firebase Auth Status
+              Supabase Auth Status
               <Badge variant={authStatus === 'authenticated' ? 'default' : 'secondary'}>
                 {authStatus}
               </Badge>
@@ -348,6 +398,13 @@ export default function SupabaseTestPage() {
                 Google Sign In
               </Button>
             </div>
+            {showConfirmationMessage && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertDescription>
+                  <strong>Action Required:</strong> Please check your email inbox for a confirmation link to complete your sign-up. To skip this step during testing, you can disable the "Confirm email" setting in your Supabase project's authentication settings.
+                </AlertDescription>
+              </Alert>
+            )}
           </CardContent>
         </Card>
       )}
@@ -360,10 +417,45 @@ export default function SupabaseTestPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <p><strong>Firebase UID:</strong> {userProfile.firebase_uid}</p>
+              <p><strong>User ID:</strong> {userProfile.user_id}</p>
               <p><strong>Email:</strong> {userProfile.email}</p>
               <p><strong>Name:</strong> {userProfile.name || 'Not set'}</p>
               <p><strong>Created:</strong> {userProfile.created_at ? new Date(userProfile.created_at).toLocaleString() : 'Unknown'}</p>
+            </div>
+            <div className="mt-4">
+              <Label htmlFor="name">Update Name</Label>
+              <div className="flex gap-2 mt-1">
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter new name"
+                />
+                <Button onClick={updateUserProfile} disabled={loading}>
+                  Save
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* All User Profiles Section */}
+      {user && (
+        <Card>
+          <CardHeader>
+            <CardTitle>All User Profiles (Supabase)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {allUserProfiles.map((profile) => (
+                <div key={profile.id} className="border rounded p-3 space-y-2">
+                  <p><strong>User ID:</strong> {profile.user_id}</p>
+                  <p><strong>Email:</strong> {profile.email}</p>
+                  <p><strong>Name:</strong> {profile.name || 'Not set'}</p>
+                  <p><strong>Created:</strong> {profile.created_at ? new Date(profile.created_at).toLocaleString() : 'Unknown'}</p>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -482,7 +574,7 @@ export default function SupabaseTestPage() {
           <strong>Instructions:</strong>
           <ol className="list-decimal list-inside mt-2 space-y-1">
             <li>First, test the Supabase connection</li>
-            <li>Sign in with Firebase (email/password or Google)</li>
+            <li>Sign up or sign in with Supabase (email/password or Google)</li>
             <li>Check that your user profile is created in Supabase</li>
             <li>Create some test data to verify posting works</li>
             <li>Verify that data is isolated to your user</li>

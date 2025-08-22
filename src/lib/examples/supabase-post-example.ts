@@ -1,17 +1,15 @@
 /**
- * Example: Authenticated Posting to Supabase with Firebase Auth
+ * Example: Authenticated Posting to Supabase
  * 
- * This file demonstrates how to post data to Supabase using Firebase authentication.
- * The integration uses Firebase JWT tokens for authentication with Supabase.
+ * This file demonstrates how to post data to Supabase using Supabase authentication.
  */
 
-import { supabase, getCurrentUserFromJWT, createUserProfile } from '@/lib/auth/supabase';
-import { auth } from '@/lib/auth/firebase';
+import { supabase, createUserProfile } from '@/lib/auth/supabase';
 
 // Example interface for a post/content item
 interface PostData {
   id?: string;
-  firebase_uid: string;
+  user_id: string;
   title: string;
   content: string;
   data?: any; // Additional JSON data
@@ -21,24 +19,24 @@ interface PostData {
 
 /**
  * Create a new post in Supabase
- * Requires user to be authenticated with Firebase
+ * Requires user to be authenticated with Supabase
  */
 export const createPost = async (title: string, content: string, additionalData?: any): Promise<PostData> => {
   try {
-    // Get current user info from Firebase JWT
-    const userInfo = await getCurrentUserFromJWT();
-    if (!userInfo) {
-      throw new Error('User not authenticated. Please sign in with Firebase first.');
+    // Get current user info from Supabase
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User not authenticated. Please sign in with Supabase first.');
     }
 
     // Ensure user profile exists in Supabase
-    await ensureUserProfile(userInfo);
+    await ensureUserProfile(user);
 
     // Create the post
     const { data, error } = await supabase
       .from('test_data')
       .insert([{
-        firebase_uid: userInfo.firebase_uid,
+        user_id: user.id,
         title: title.trim(),
         content: content.trim(),
         data: additionalData || null,
@@ -64,15 +62,15 @@ export const createPost = async (title: string, content: string, additionalData?
  */
 export const getUserPosts = async (): Promise<PostData[]> => {
   try {
-    const userInfo = await getCurrentUserFromJWT();
-    if (!userInfo) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       throw new Error('User not authenticated');
     }
 
     const { data, error } = await supabase
       .from('test_data')
       .select('*')
-      .eq('firebase_uid', userInfo.firebase_uid)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -92,8 +90,8 @@ export const getUserPosts = async (): Promise<PostData[]> => {
  */
 export const updatePost = async (postId: string, title: string, content: string, additionalData?: any): Promise<PostData> => {
   try {
-    const userInfo = await getCurrentUserFromJWT();
-    if (!userInfo) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       throw new Error('User not authenticated');
     }
 
@@ -106,7 +104,7 @@ export const updatePost = async (postId: string, title: string, content: string,
         updated_at: new Date().toISOString(),
       })
       .eq('id', postId)
-      .eq('firebase_uid', userInfo.firebase_uid) // Ensure user can only update their own posts
+      .eq('user_id', user.id) // Ensure user can only update their own posts
       .select()
       .single();
 
@@ -132,8 +130,8 @@ export const updatePost = async (postId: string, title: string, content: string,
  */
 export const deletePost = async (postId: string): Promise<void> => {
   try {
-    const userInfo = await getCurrentUserFromJWT();
-    if (!userInfo) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       throw new Error('User not authenticated');
     }
 
@@ -141,7 +139,7 @@ export const deletePost = async (postId: string): Promise<void> => {
       .from('test_data')
       .delete()
       .eq('id', postId)
-      .eq('firebase_uid', userInfo.firebase_uid); // Ensure user can only delete their own posts
+      .eq('user_id', user.id); // Ensure user can only delete their own posts
 
     if (error) {
       console.error('Supabase error:', error);
@@ -157,14 +155,14 @@ export const deletePost = async (postId: string): Promise<void> => {
 
 /**
  * Ensure user profile exists in Supabase
- * This should be called after Firebase authentication
+ * This should be called after Supabase authentication
  */
-const ensureUserProfile = async (userInfo: any) => {
+const ensureUserProfile = async (user: any) => {
   try {
     await createUserProfile({
-      firebase_uid: userInfo.firebase_uid,
-      email: userInfo.email,
-      name: userInfo.name,
+      user_id: user.id,
+      email: user.email,
+      name: user.user_metadata.name,
     });
   } catch (error: any) {
     // If user already exists, that's fine
@@ -177,21 +175,23 @@ const ensureUserProfile = async (userInfo: any) => {
 /**
  * Check if user is authenticated
  */
-export const isUserAuthenticated = (): boolean => {
-  return auth.currentUser !== null;
+export const isUserAuthenticated = async (): Promise<boolean> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  return !!user;
 };
 
 /**
- * Get current user's Firebase UID
+ * Get current user's Supabase UID
  */
-export const getCurrentUserUID = (): string | null => {
-  return auth.currentUser?.uid || null;
+export const getCurrentUserUID = async (): Promise<string | null> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  return user?.id || null;
 };
 
 /**
  * Example usage:
  * 
- * // After user signs in with Firebase
+ * // After user signs in with Supabase
  * import { createPost, getUserPosts } from '@/lib/examples/supabase-post-example';
  * 
  * // Create a post

@@ -6,16 +6,15 @@ import { z } from "zod";
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
-import { signInWithEmailAndPassword } from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { auth } from "@/lib/auth/firebase";
 import { Icons } from "@/components/icons";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { DiagnosticProvider } from "@/contexts/DiagnosticContext";
+import { getAuthErrorMessage } from "@/lib/auth/supabase-auth";
 
 const loginFormSchema = z.object({
   email: z.string().email({ message: "Por favor, insira um e-mail válido." }),
@@ -28,7 +27,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const { user, loading } = useAuth();
+  const { user, loading, signIn } = useSupabaseAuth();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -49,37 +48,28 @@ export default function LoginPage() {
   async function onSubmit(formData: LoginFormValues) {
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      handleSuccessfulLogin();
-    } catch (error: any) {
-      if (error.code === 'auth/user-not-found') {
-        toast({
-          variant: "destructive",
-          title: "Usuário não encontrado",
-          description: "Não encontramos uma conta com este e-mail. Verifique o e-mail ou crie uma nova conta.",
-        });
-      } else if (error.code === 'auth/wrong-password') {
-        toast({
-          variant: "destructive",
-          title: "Senha incorreta",
-          description: "A senha informada está incorreta. Tente novamente.",
-        });
-      } else if (error.code === 'auth/invalid-credential') {
-        toast({
-          variant: "destructive",
-          title: "Credenciais inválidas",
-          description: "E-mail ou senha incorretos. Verifique suas credenciais e tente novamente.",
-        });
-      } else {
+      const { error } = await signIn(formData.email, formData.password);
+      
+      if (error) {
+        const errorMessage = getAuthErrorMessage(error);
         toast({
           variant: "destructive",
           title: "Erro ao fazer login",
-          description: "Não foi possível fazer login. Tente novamente.",
+          description: errorMessage,
         });
+        console.error("Supabase Auth Error:", error);
+      } else {
+        handleSuccessfulLogin();
       }
-      console.error("Firebase Auth Error:", error);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro inesperado",
+        description: "Ocorreu um erro inesperado. Tente novamente.",
+      });
+      console.error("Unexpected error:", error);
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   }
 
@@ -92,7 +82,7 @@ export default function LoginPage() {
   }
 
   if (user) {
-    router.push('/diagnostico/onboarding');
+    router.push('/projetos');
     return null;
   }
 
@@ -188,7 +178,7 @@ export default function LoginPage() {
                       Aguarde...
                     </>
                   ) : (
-                    'Entrar e Continuar Diagnóstico'
+                    'Entrar'
                   )}
                 </Button>
               </form>

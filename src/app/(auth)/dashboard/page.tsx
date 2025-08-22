@@ -6,8 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { withAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/auth/firebase';
+import { supabase } from '@/lib/auth/supabase';
 import { Icons } from '@/components/icons';
 
 function Dashboard() {
@@ -27,15 +26,24 @@ function Dashboard() {
 
     setIsLoading(true);
     try {
-      const docRef = await addDoc(collection(db, 'test'), {
-        userId: user.uid,
-        email: user.email,
-        createdAt: serverTimestamp(),
-        message: `Hello from ${user.email}`,
-      });
+      const { data, error } = await supabase
+        .from('test_data')
+        .insert({
+          user_id: user.id,
+          email: user.email,
+          message: `Hello from ${user.email}`,
+          created_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
       toast({
         title: 'Document Created',
-        description: `Test document created with ID: ${docRef.id}`,
+        description: `Test document created with ID: ${data.id}`,
       });
     } catch (error) {
       console.error('Error adding document: ', error);
@@ -64,7 +72,7 @@ function Dashboard() {
           <div className="space-y-6">
             <div className="rounded-lg border bg-card p-6 shadow-sm">
               <h2 className="text-2xl font-semibold">
-                Welcome, {user?.displayName || 'User'}
+                Welcome, {user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email || 'User'}
               </h2>
               <p className="mt-2 text-muted-foreground">
                 This is your protected dashboard page.
@@ -72,11 +80,11 @@ function Dashboard() {
             </div>
             <div className="rounded-lg border bg-card p-6 shadow-sm">
               <h3 className="text-lg font-semibold">
-                Test Firestore Connection
+                Test Supabase Connection
               </h3>
               <p className="mt-2 text-muted-foreground">
                 Click the button below to create a test document in your
-                Firestore database.
+                Supabase database.
               </p>
               <div className="mt-4">
                 <Button

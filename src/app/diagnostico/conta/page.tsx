@@ -6,7 +6,6 @@ import { z } from "zod";
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,9 +14,8 @@ import { Input } from "@/components/ui/input";
 import { StepFooter } from "@/components/diagnostico/StepFooter";
 import { StepShell, TipCard } from "@/components/diagnostico/StepShell";
 import { useToast } from "@/hooks/use-toast";
-import { auth } from "@/lib/auth/firebase";
 import { Icons } from "@/components/icons";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { useDiagnostic } from "@/contexts/DiagnosticContext";
 
 const accountFormSchema = z.object({
@@ -36,7 +34,7 @@ export default function ContaPage() {
   const { toast } = useToast();
   const { data, updateData } = useDiagnostic();
   const [isLoading, setIsLoading] = useState(false);
-  const { user, loading } = useAuth();
+  const { user, loading, signUp } = useSupabaseAuth();
 
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
@@ -59,30 +57,39 @@ export default function ContaPage() {
   async function onSubmit(formData: AccountFormValues) {
     setIsLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      await updateProfile(userCredential.user, {
-        displayName: formData.name,
+      const { error } = await signUp(formData.email, formData.password, {
+        data: { name: formData.name },
       });
+
+      if (error) {
+        if (error.message?.includes('already registered') || error.message?.includes('already exists')) {
+          toast({
+            variant: "destructive",
+            title: "E-mail já cadastrado",
+            description: "Este e-mail já está em uso. Tente fazer login ou use um e-mail diferente.",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Erro ao criar conta",
+            description: error.message || "Não foi possível criar sua conta. Tente novamente.",
+          });
+        }
+        return;
+      }
+
       // Save final data before navigating
-      updateData('conta', { name: formData.name, email: formData.email, lgpd: formData.lgpd });
+      updateData({ conta: { name: formData.name, email: formData.email, lgpd: formData.lgpd } });
       handleSuccessfulLogin();
     } catch (error: any) {
-      if (error.code === 'auth/email-already-in-use') {
-        toast({
-          variant: "destructive",
-          title: "E-mail já cadastrado",
-          description: "Este e-mail já está em uso. Tente fazer login ou use um e-mail diferente.",
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Erro ao criar conta",
-          description: "Não foi possível criar sua conta. Tente novamente.",
-        });
-      }
-      console.error("Firebase Auth Error:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao criar conta",
+        description: "Não foi possível criar sua conta. Tente novamente.",
+      });
+      console.error("Supabase Auth Error:", error);
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   }
 
@@ -128,7 +135,7 @@ export default function ContaPage() {
   if (user) {
     return (
       <StepShell
-        title={`Bem-vindo de volta, ${user.displayName || 'usuário'}!`}
+        title={`Bem-vindo de volta, ${user.user_metadata?.name || user.user_metadata?.full_name || 'usuário'}!`}
         description="Ficamos felizes em te ver novamente. Vamos continuar de onde você parou?"
         aside={AsideContent}
         footer={

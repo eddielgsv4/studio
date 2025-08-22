@@ -49,6 +49,34 @@ interface CollectedData {
   taxaFechamento?: string;
   motivoPerdas?: string;
   retencao?: string;
+  // Topo de Funil
+  topoVisitanteLead?: string;
+  topoCTRAnuncios?: string;
+  leadsMes?: string;
+  custoPorLead?: string;
+  // Novos KPIs por etapa do funil
+  // Topo de Funil
+  qualidadeLead?: string;
+  tempoPagina?: string;
+  // Meio de Funil
+  leadMQL?: string;
+  tempoResposta?: string;
+  showRate?: string;
+  emailOpenRate?: string;
+  clickRate?: string;
+  leadScoreMedio?: string;
+  // Fundo de Funil
+  mqlSQL?: string;
+  sqlVenda?: string;
+  propostaFechamento?: string;
+  reunioesVendedor?: string;
+  // Pós Conversão
+  churn30d?: string;
+  recompra60d?: string;
+  ltv?: string;
+  nps?: string;
+  tempoOnboarding?: string;
+  upsellRate?: string;
 }
 
 interface OnboardingChatWithSidebarProps {
@@ -104,7 +132,34 @@ export function OnboardingChatWithSidebar({ onComplete }: OnboardingChatWithSide
     gargaloMeio: "tempo de resposta muito alto (45 min)",
     taxaFechamento: "28%",
     motivoPerdas: "concorrência e preço",
-    retencao: "88%"
+    retencao: "88%",
+    topoVisitanteLead: "3.2",
+    topoCTRAnuncios: "2.1",
+    leadsMes: "448",
+    custoPorLead: "55.80",
+    // Novos KPIs por etapa do funil
+    // Topo de Funil
+    qualidadeLead: "7.2/10",
+    tempoPagina: "2m 45s",
+    // Meio de Funil
+    leadMQL: "25%",
+    tempoResposta: "45 min",
+    showRate: "72%",
+    emailOpenRate: "24%",
+    clickRate: "3.8%",
+    leadScoreMedio: "68/100",
+    // Fundo de Funil
+    mqlSQL: "65%",
+    sqlVenda: "28%",
+    propostaFechamento: "18 dias",
+    reunioesVendedor: "12/mês",
+    // Pós Conversão
+    churn30d: "8%",
+    recompra60d: "15%",
+    ltv: "R$ 8.750",
+    nps: "42",
+    tempoOnboarding: "14 dias",
+    upsellRate: "22%"
   };
 
   const simulateConversation = async () => {
@@ -194,7 +249,7 @@ export function OnboardingChatWithSidebar({ onComplete }: OnboardingChatWithSide
         action: () => {
           setCollectedData(prev => ({ ...prev, visitantes: techCorpData.visitantes }));
           addBotMessage(
-            `${techCorpData.visitantes} visitantes mensais é um bom volume para trabalharmos!\n\nDesses visitantes, quantos se tornam leads (deixam contato, baixam material, etc.)? Pode ser em número absoluto ou percentual.`,
+            `${techCorpData.visitantes} visitantes mensais é um bom volume para trabalharmos!\n\nQual a taxa de conversão de Visitante para Lead? (%)`,
             `✅ Visitantes mensais: ${techCorpData.visitantes}`,
             1600
           );
@@ -202,17 +257,62 @@ export function OnboardingChatWithSidebar({ onComplete }: OnboardingChatWithSide
       },
       {
         delay: 3200,
-        action: () => addUserMessage(techCorpData.conversaoTopo)
+        action: () => addUserMessage(techCorpData.topoVisitanteLead)
       },
       {
         delay: 1800,
         action: () => {
-          setCollectedData(prev => ({ ...prev, conversaoTopo: techCorpData.conversaoTopo }));
+          setCollectedData(prev => ({ ...prev, topoVisitanteLead: techCorpData.topoVisitanteLead }));
+          addBotMessage(
+            `Entendido. E qual o CTR médio dos seus anúncios? (%)`,
+            `✅ Visitante → Lead: ${techCorpData.topoVisitanteLead}%`,
+            1600
+          );
+        }
+      },
+      {
+        delay: 3200,
+        action: () => addUserMessage(techCorpData.topoCTRAnuncios)
+      },
+      {
+        delay: 1800,
+        action: () => {
+          setCollectedData(prev => ({ ...prev, topoCTRAnuncios: techCorpData.topoCTRAnuncios }));
+          addBotMessage(
+            `Ok. Quantos leads em média vocês geram por mês?`,
+            `✅ CTR Anúncios: ${techCorpData.topoCTRAnuncios}%`,
+            1600
+          );
+        }
+      },
+      {
+        delay: 3200,
+        action: () => addUserMessage(techCorpData.leadsMes)
+      },
+      {
+        delay: 1800,
+        action: () => {
+          setCollectedData(prev => ({ ...prev, leadsMes: techCorpData.leadsMes }));
+          addBotMessage(
+            `E para finalizar o topo do funil, qual o Custo por Lead (CPL) médio? (R$)`,
+            `✅ Leads/Mês: ${techCorpData.leadsMes}`,
+            1600
+          );
+        }
+      },
+      {
+        delay: 3200,
+        action: () => addUserMessage(techCorpData.custoPorLead)
+      },
+      {
+        delay: 1800,
+        action: () => {
+          setCollectedData(prev => ({ ...prev, custoPorLead: techCorpData.custoPorLead }));
           setCurrentStage('meio');
           setProgress(65);
           addBotMessage(
-            `Perfeito! Sua taxa de conversão no topo está mapeada.\n\n🎯 **MEIO DO FUNIL - Qualificação**\n\nAgora vamos entender como você qualifica esses leads. Dos leads que entram, quantos se tornam oportunidades reais de venda? (Em % ou número)`,
-            `✅ Conversão Topo: ${techCorpData.conversaoTopo}`,
+            `Perfeito! Suas métricas de topo de funil estão mapeadas.\n\n🎯 **MEIO DO FUNIL - Qualificação**\n\nAgora vamos entender como você qualifica esses leads. Dos leads que entram, quantos se tornam oportunidades reais de venda? (Em % ou número)`,
+            `✅ Custo por Lead: R$ ${techCorpData.custoPorLead}`,
             2000
           );
         }
@@ -408,18 +508,42 @@ export function OnboardingChatWithSidebar({ onComplete }: OnboardingChatWithSide
           // Visitantes coletados
           setCollectedData((prev: CollectedData) => ({ ...prev, visitantes: response }));
           addBotMessage(
-            `${response} visitantes mensais é um bom volume para trabalharmos!\n\nDesses visitantes, quantos se tornam leads (deixam contato, baixam material, etc.)? Pode ser em número absoluto ou percentual.`,
+            `${response} visitantes mensais é um bom volume para trabalharmos!\n\nQual a taxa de conversão de Visitante para Lead? (%)`,
             `✅ Visitantes mensais: ${response}`,
             1600
           );
         } else if (messageCount === 5) {
           // Taxa de conversão topo coletada
-          setCollectedData((prev: CollectedData) => ({ ...prev, conversaoTopo: response }));
+          setCollectedData((prev: CollectedData) => ({ ...prev, topoVisitanteLead: response }));
+          addBotMessage(
+            `Entendido. E qual o CTR médio dos seus anúncios? (%)`,
+            `✅ Visitante → Lead: ${response}%`,
+            1600
+          );
+        } else if (messageCount === 6) {
+          // CTR Anuncios coletado
+          setCollectedData((prev: CollectedData) => ({ ...prev, topoCTRAnuncios: response }));
+          addBotMessage(
+            `Ok. Quantos leads em média vocês geram por mês?`,
+            `✅ CTR Anúncios: ${response}%`,
+            1600
+          );
+        } else if (messageCount === 7) {
+          // Leads/Mês coletado
+          setCollectedData((prev: CollectedData) => ({ ...prev, leadsMes: response }));
+          addBotMessage(
+            `E para finalizar o topo do funil, qual o Custo por Lead (CPL) médio? (R$)`,
+            `✅ Leads/Mês: ${response}`,
+            1600
+          );
+        } else if (messageCount === 8) {
+          // Custo por Lead coletado
+          setCollectedData((prev: CollectedData) => ({ ...prev, custoPorLead: response }));
           setCurrentStage('meio');
           setProgress(stages.meio.progress);
           addBotMessage(
-            `Perfeito! Sua taxa de conversão no topo está mapeada.\n\n🎯 **MEIO DO FUNIL - Qualificação**\n\nAgora vamos entender como você qualifica esses leads. Dos leads que entram, quantos se tornam oportunidades reais de venda? (Em % ou número)`,
-            `✅ Conversão Topo: ${response}`,
+            `Perfeito! Suas métricas de topo de funil estão mapeadas.\n\n🎯 **MEIO DO FUNIL - Qualificação**\n\nAgora vamos entender como você qualifica esses leads. Dos leads que entram, quantos se tornam oportunidades reais de venda? (Em % ou número)`,
+            `✅ Custo por Lead: R$ ${response}`,
             2000
           );
         }
@@ -701,12 +825,28 @@ export function OnboardingChatWithSidebar({ onComplete }: OnboardingChatWithSide
             </CardHeader>
             <CardContent className="space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-gray-400">Visitantes/mês:</span>
-                <span className="text-white">{collectedData.visitantes || '—'}</span>
+                <span className="text-gray-400">Visitante → Lead:</span>
+                <span className="text-white">{collectedData.topoVisitanteLead ? `${collectedData.topoVisitanteLead}%` : '—'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Conversão:</span>
-                <span className="text-white">{collectedData.conversaoTopo || '—'}</span>
+                <span className="text-gray-400">CTR Anúncios:</span>
+                <span className="text-white">{collectedData.topoCTRAnuncios ? `${collectedData.topoCTRAnuncios}%` : '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Leads/Mês:</span>
+                <span className="text-white">{collectedData.leadsMes || '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Custo por Lead:</span>
+                <span className="text-white">{collectedData.custoPorLead ? `R$ ${collectedData.custoPorLead}` : '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Qualidade do Lead:</span>
+                <span className="text-white">{collectedData.qualidadeLead || '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Tempo na Página:</span>
+                <span className="text-white">{collectedData.tempoPagina || '—'}</span>
               </div>
             </CardContent>
           </Card>
@@ -721,12 +861,28 @@ export function OnboardingChatWithSidebar({ onComplete }: OnboardingChatWithSide
             </CardHeader>
             <CardContent className="space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-gray-400">Qualificação:</span>
-                <span className="text-white">{collectedData.qualificacao || '—'}</span>
+                <span className="text-gray-400">Lead → MQL:</span>
+                <span className="text-white">{collectedData.leadMQL || '—'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Gargalo:</span>
-                <span className="text-white text-right">{collectedData.gargaloMeio || '—'}</span>
+                <span className="text-gray-400">Tempo de Resposta:</span>
+                <span className="text-white">{collectedData.tempoResposta || '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Show Rate:</span>
+                <span className="text-white">{collectedData.showRate || '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Email Open Rate:</span>
+                <span className="text-white">{collectedData.emailOpenRate || '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Click Rate:</span>
+                <span className="text-white">{collectedData.clickRate || '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Lead Score Médio:</span>
+                <span className="text-white">{collectedData.leadScoreMedio || '—'}</span>
               </div>
             </CardContent>
           </Card>
@@ -741,28 +897,64 @@ export function OnboardingChatWithSidebar({ onComplete }: OnboardingChatWithSide
             </CardHeader>
             <CardContent className="space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-gray-400">Taxa Fechamento:</span>
-                <span className="text-white">{collectedData.taxaFechamento || '—'}</span>
+                <span className="text-gray-400">MQL → SQL:</span>
+                <span className="text-white">{collectedData.mqlSQL || '—'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Motivo Perdas:</span>
-                <span className="text-white text-right">{collectedData.motivoPerdas || '—'}</span>
+                <span className="text-gray-400">SQL → Venda:</span>
+                <span className="text-white">{collectedData.sqlVenda || '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Ticket Médio:</span>
+                <span className="text-white">{collectedData.ticketMedio || '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Ciclo de Vendas:</span>
+                <span className="text-white">{collectedData.cicloVendas ? `${collectedData.cicloVendas} dias` : '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Proposta → Fechamento:</span>
+                <span className="text-white">{collectedData.propostaFechamento || '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Reuniões/Vendedor:</span>
+                <span className="text-white">{collectedData.reunioesVendedor || '—'}</span>
               </div>
             </CardContent>
           </Card>
 
-          {/* Pós-Venda */}
+          {/* Pós Conversão */}
           <Card className="bg-[#0B0C0E] border-gray-700">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm text-white flex items-center">
                 <RefreshCw className="h-4 w-4 mr-2 text-[#E11D2E]" />
-                Pós-Venda
+                Pós Conversão
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-gray-400">Retenção:</span>
-                <span className="text-white">{collectedData.retencao || '—'}</span>
+                <span className="text-gray-400">Churn 30d:</span>
+                <span className="text-white">{collectedData.churn30d || '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Recompra 60d:</span>
+                <span className="text-white">{collectedData.recompra60d || '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">LTV:</span>
+                <span className="text-white">{collectedData.ltv || '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">NPS:</span>
+                <span className="text-white">{collectedData.nps || '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Tempo Onboarding:</span>
+                <span className="text-white">{collectedData.tempoOnboarding || '—'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Upsell Rate:</span>
+                <span className="text-white">{collectedData.upsellRate || '—'}</span>
               </div>
             </CardContent>
           </Card>

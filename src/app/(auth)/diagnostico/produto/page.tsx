@@ -98,7 +98,7 @@ export default function ProdutoPage() {
     setIsGenerating(true);
     try {
         const fullPrompt = `Descrição: ${prompt}. Contexto adicional: ${context || 'Nenhum'}`;
-        const imageUrl = await runGenerateAdCreative({ userId: user.uid, prompt: fullPrompt });
+        const imageUrl = await runGenerateAdCreative({ userId: user.id, prompt: fullPrompt });
         setPreview(imageUrl);
         form.setValue('materialMarketingUri', imageUrl);
         toast({

@@ -1,14 +1,15 @@
-
 'use server';
 
-import { db } from './auth/firebase';
-import { doc, getDoc, setDoc, runTransaction, writeBatch, type WriteBatch } from 'firebase/firestore';
+import { supabase } from './auth/supabase';
 
 /**
  * Represents a user's credit wallet.
  */
 interface Wallet {
+  user_id: string;
   balance: number;
+  created_at: string;
+  updated_at: string;
 }
 
 
@@ -18,13 +19,18 @@ interface Wallet {
  * @returns The user's wallet, or null if it doesn't exist.
  */
 export async function getWallet(userId: string): Promise<Wallet | null> {
-  const walletRef = doc(db, 'wallets', userId);
-  const walletSnap = await getDoc(walletRef);
+  const { data, error } = await supabase
+    .from('wallets')
+    .select('*')
+    .eq('user_id', userId)
+    .single();
 
-  if (walletSnap.exists()) {
-    return walletSnap.data() as Wallet;
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error getting wallet:', error);
+    throw error;
   }
-  return null;
+
+  return data;
 }
 
 /**
@@ -36,27 +42,12 @@ export async function getWallet(userId: string): Promise<Wallet | null> {
 export async function debitCredits(userId: string, amount: number): Promise<void> {
   if (amount <= 0) return;
 
-  const walletRef = doc(db, 'wallets', userId);
+  const { error } = await supabase.rpc('debit_credits', {
+    user_id_param: userId,
+    amount_param: amount,
+  });
 
-  try {
-    await runTransaction(db, async (transaction) => {
-      const walletDoc = await transaction.get(walletRef);
-      if (!walletDoc.exists()) {
-        // This is a system-level error, not a user balance issue.
-        throw new Error('User wallet does not exist. Cannot debit credits.');
-      }
-
-      const currentBalance = walletDoc.data().balance;
-      if (currentBalance < amount) {
-        // Throw a specific, predictable error for insufficient balance.
-        throw new Error('Insufficient credits.');
-      }
-
-      const newBalance = currentBalance - amount;
-      transaction.update(walletRef, { balance: newBalance, updatedAt: new Date() });
-    });
-  } catch (error: any) {
-    // Log the original error for debugging, but re-throw it to be handled by the caller.
+  if (error) {
     console.error(`Credit debit transaction for user ${userId} failed: `, error.message);
     throw error;
   }
@@ -70,21 +61,12 @@ export async function debitCredits(userId: string, amount: number): Promise<void
 export async function addCredits(userId: string, amount: number): Promise<void> {
     if (amount <= 0) return;
 
-    const walletRef = doc(db, 'wallets', userId);
+    const { error } = await supabase.rpc('add_credits', {
+        user_id_param: userId,
+        amount_param: amount,
+    });
 
-    try {
-        await runTransaction(db, async (transaction) => {
-            const walletDoc = await transaction.get(walletRef);
-            if (!walletDoc.exists()) {
-                // If wallet doesn't exist, create it with the added amount.
-                // This is a fallback, standard flow should create wallet on user creation.
-                transaction.set(walletRef, { balance: amount, createdAt: new Date(), updatedAt: new Date() });
-            } else {
-                const newBalance = walletDoc.data().balance + amount;
-                transaction.update(walletRef, { balance: newBalance, updatedAt: new Date() });
-            }
-        });
-    } catch (error) {
+    if (error) {
         console.error(`Credit addition transaction for user ${userId} failed: `, error);
         throw error;
     }

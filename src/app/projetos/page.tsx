@@ -129,7 +129,7 @@ export default function ProjetosPage() {
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-[#E11D2E] rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-semibold">
-                  {user?.displayName?.charAt(0)?.toUpperCase() || 'U'}
+                  {(user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email)?.charAt(0)?.toUpperCase() || 'U'}
                 </span>
               </div>
             </div>
@@ -143,7 +143,7 @@ export default function ProjetosPage() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">Meus Projetos</h1>
             <p className="text-gray-400">
-              Bem-vindo(a) de volta, {user?.displayName || 'Usuário'}.
+              Bem-vindo(a) de volta, {user?.user_metadata?.name || user?.user_metadata?.full_name || 'Usuário'}.
             </p>
           </div>
 

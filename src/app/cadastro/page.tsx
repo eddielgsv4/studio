@@ -6,16 +6,14 @@ import { z } from "zod";
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { auth } from "@/lib/auth/firebase";
 import { Icons } from "@/components/icons";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { DiagnosticProvider } from "@/contexts/DiagnosticContext";
 
 const signupFormSchema = z.object({
@@ -37,7 +35,7 @@ export default function CadastroPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const { user, loading } = useAuth();
+  const { user, loading, signUp } = useSupabaseAuth();
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupFormSchema),
@@ -61,28 +59,49 @@ export default function CadastroPage() {
   async function onSubmit(formData: SignupFormValues) {
     setIsLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-      await updateProfile(userCredential.user, {
-        displayName: formData.name,
+      const { error } = await signUp(formData.email, formData.password, {
+        data: { name: formData.name },
       });
-      handleSuccessfulSignup();
-    } catch (error: any) {
-      if (error.code === 'auth/email-already-in-use') {
-        toast({
-          variant: "destructive",
-          title: "E-mail já cadastrado",
-          description: "Este e-mail já está em uso. Tente fazer login ou use um e-mail diferente.",
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Erro ao criar conta",
-          description: "Não foi possível criar sua conta. Tente novamente.",
-        });
+
+      if (error) {
+        if (error.message?.includes('already registered') || error.message?.includes('already exists')) {
+          toast({
+            variant: "destructive",
+            title: "E-mail já cadastrado",
+            description: "Este e-mail já está em uso. Tente fazer login ou use um e-mail diferente.",
+          });
+        } else if (error.message?.includes('email confirmation')) {
+          toast({
+            title: "Confirme seu e-mail",
+            description: "Enviamos um link de confirmação para seu e-mail. Verifique sua caixa de entrada.",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Erro ao criar conta",
+            description: error.message || "Não foi possível criar sua conta. Tente novamente.",
+          });
+        }
+        return;
       }
-      console.error("Firebase Auth Error:", error);
+
+      // If no error, signup was successful
+      // Check if email confirmation is required (this depends on Supabase settings)
+      toast({
+        title: "Conta criada com sucesso!",
+        description: "Verifique seu e-mail para confirmar sua conta e fazer login.",
+      });
+      router.push('/login?message=check-email');
+      
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao criar conta",
+        description: "Não foi possível criar sua conta. Tente novamente.",
+      });
+      console.error("Supabase Auth Error:", error);
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   }
 
@@ -95,7 +114,7 @@ export default function CadastroPage() {
   }
 
   if (user) {
-    router.push('/diagnostico/onboarding');
+    router.push('/projetos');
     return null;
   }
 
@@ -245,7 +264,7 @@ export default function CadastroPage() {
                       Aguarde...
                     </>
                   ) : (
-                    'Criar Conta e Iniciar Diagnóstico'
+                    'Criar Conta'
                   )}
                 </Button>
               </form>
